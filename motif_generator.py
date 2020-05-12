@@ -46,22 +46,91 @@ def generate_rhythm(meter, measure_count):
     return rhythm
 
 
-# def generate_pitches(size, mode, span, step_size):
-    
+def select_motion():
+    r = random.randint(0,15)
+    if r == 0:
+        return [0,0]
+    elif r == 15:
+        return [-1,0,-1]
+    elif r % 5 == 1:
+        return [1,2]
+    elif r % 5 == 2:
+        return [2,4]
+    elif r % 5 == 3:
+        return [-1,-2]
+    elif r % 5 == 4:
+        return [-2,-4]
+    else:
+        return [3, 5]
+        # maybe the other way (0,-1,0), too?
+
+def generate_pitches(length, mode, span, step_size):
+    base = 64
+    pitches = [64]
+    previous_motion = []
+    penultimate_motion = []
+
+    fuller_mode = []
+    for i in range(-2, 2):
+        for j in range(len(mode)):
+            fuller_mode.append(mode[j] + i*12)
+
+    while len(pitches) < length:
+        motion = select_motion()
+        # prevent the same motion repeating too much
+        # and from pitches going out of range
+        is_repeating = motion == previous_motion #and motion == penultimate_motion
+
+        a = fuller_mode.index((pitches[-1]-base))
+        b = list(map(lambda x: fuller_mode[a+x], motion))
+        potential_pitches = list(map(lambda x: x + base, b))
+        out_of_range = span/2 < abs(potential_pitches[-1] - base)
+
+        while is_repeating or out_of_range:
+            motion = select_motion()
+            is_repeating = motion == previous_motion #and motion == penultimate_motion
+            a = fuller_mode.index(pitches[-1] - base)
+            b = list(map(lambda x: fuller_mode[a+x], motion))
+            potential_pitches = list(map(lambda x: x + base, b))
+            out_of_range = span/2 < abs(potential_pitches[-1] - base)
+
+        penultimate_motion = previous_motion    
+        previous_motion = motion
+
+        pitches += potential_pitches
+
+    # trim down if too long
+    while len(pitches) > length:
+        pitches.pop()
+
+    return pitches
 
 
-# def motif_generator(meter, measure_count, span, step_size, modes_key):
+def merge_pitches_with_rhythm(pitches, rhythm):
+    result = ""
+    for i in range(len(pitches)):
+        result += "note " + rhythm[i] + " " + str(pitches[i]) 
+        if i < len(pitches)-1:
+            result += " :+: "
+    return result
 
-#     rhythm = generate_rhythm(meter, measure_count)
 
-#     pitches = generate_pitches(len(rhythm), modes_key, span, step_size)
+def motif_generator(meter, measure_count, span, step_size, modes_key):
+
+    rhythm = generate_rhythm(meter, measure_count)
+    pitches = generate_pitches(len(rhythm), modes_key, span, step_size)
 
 #     while is_improvable(pitches):
 #         pitches = fix(pitches)
 
-#     return map(rhythm, pitches)
+    return merge_pitches_with_rhythm(pitches, rhythm)
 
+# TOOD: "step_size" doesn't do anything atm
 
+mode = apply_key("Ionian", "B")
+rhythm = generate_rhythm((3,4),3)
+print(generate_pitches(len(rhythm), mode[1], 18, 2))
+print(motif_generator((3,4), 7, 26, 3, mode[1]))
 
 
 # fix(pitches)
