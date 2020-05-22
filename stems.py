@@ -4,7 +4,8 @@ from functools import reduce
 
 from chord_progression import generate_full_chord_sequence
 from modes_and_keys import apply_key
-from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets 
+from rhythm import generate_rhythm, replace_some_quarters_with_eights
+from rhythm import merge_pitches_with_rhythm, rhythm_pdf_presets 
 
 
 def choose_leading_tone(origin, goal):
@@ -24,7 +25,6 @@ def generate_walking_bass(chords):
 		measure = []
 		measure.append(chords[i][0])
 		measure.append(random.choice(chords[i][1:]))
-		print([i for i in chords[i] if i not in measure])
 		measure.append(random.choice([i for i in chords[i] if i not in measure]))
 		if i < len(chords)-1:
 			measure.append(choose_leading_tone(measure[-1], chords[i+1][0]))
@@ -35,12 +35,11 @@ def generate_walking_bass(chords):
 
 
 key = apply_key("Aeolian", "C")[1]
-seq = generate_full_chord_sequence("minor", key, 40)
+seq = generate_full_chord_sequence("minor", key, 60)
 walk = generate_walking_bass(seq)
-rhythm = generate_rhythm((3,4), len(seq)+len(seq)/3, False, rhythm_pdf_presets["default"])
+rhythm = generate_rhythm((3,4), len(seq)+2*len(seq)/3, False, rhythm_pdf_presets["default"])
+rhythm = replace_some_quarters_with_eights(rhythm, 3)
 # print(len(seq)*4, len(reduce(lambda x,y: x+y, walk)))
 # print(len(rhythm), len(reduce(lambda x,y: x+y, walk)))
-print(len(reduce(lambda x,y: x+y, walk)))
-print(len(rhythm))
 b = merge_pitches_with_rhythm(reduce(lambda x,y: x+y, walk), rhythm)
 print(b)

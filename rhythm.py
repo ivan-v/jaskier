@@ -2,7 +2,7 @@ import random
 
 # should add up to 1
 rhythm_pdf_presets = {
-    "default": {"hn": .25, "qn": .45, "en": .3},
+    "default": {"hn": .33, "qn": .66, "en": .01},
 }
 
 # meter is a tuple (top, bottom)
@@ -13,6 +13,7 @@ def check_space(meter, measure_count):
     if measure_count > 2:
         space_for_repeating = True
     return space_for_repeating
+
 
 def generate_rhythm_measure(space_left, rhythm_pdf):
     measure = []
@@ -26,8 +27,19 @@ def generate_rhythm_measure(space_left, rhythm_pdf):
         if space_left >= space_values[note]:
             space_left -= space_values[note]
             measure.append(note)
-
     return measure
+
+
+def replace_some_quarters_with_eights(rhythm, frequency):
+    new_rhythm = rhythm
+    for i in range(len(new_rhythm)):
+        r = random.randint(0, frequency)
+        if r == 0 and new_rhythm[i] == "qn":
+            new_rhythm[i] = "en"
+            new_rhythm.insert(i, 'en')
+    return new_rhythm
+
+
 
 # Doesn't work with whacky meters (anything other than a base-4 in the denominator)
 def generate_rhythm(meter, measure_count, show_seperate_measures, rhythm_pdf):
@@ -57,7 +69,6 @@ def generate_rhythm(meter, measure_count, show_seperate_measures, rhythm_pdf):
 
 def merge_pitches_with_rhythm(pitches, rhythm):
     result = ""
-    print(rhythm)
     for i in range(len(pitches)):
         result += "note " + rhythm[i] + " " + str(pitches[i]) 
         if i < len(pitches)-1:
