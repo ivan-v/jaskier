@@ -7,7 +7,6 @@ from modes_and_keys import apply_key
 from rhythm import generate_rhythm, replace_some_quarters_with_eights
 from rhythm import merge_pitches_with_rhythm, rhythm_pdf_presets 
 
-
 def choose_leading_tone(origin, goal):
 	sign = (goal-origin>0) - (goal-origin<0)
 

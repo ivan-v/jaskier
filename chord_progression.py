@@ -3,7 +3,7 @@ import random
 from functools import reduce
 
 from modes_and_keys import apply_key
-from motif_generator import generate_rhythm, merge_pitches_with_rhythm
+from rhythm import generate_rhythm, merge_pitches_with_rhythm
 
 
 def grow_chord_progression(progression):
@@ -34,7 +34,7 @@ def generate_chord_progression():
     progression = grow_chord_progression(progression)
   return progression
 
-Special_Chord_Progressions = {
+Special_Chords = {
   "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
   }
 

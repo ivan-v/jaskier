@@ -6,6 +6,7 @@ Forms = {
     "Ternary":  ["A", "B", "A"],
     "Arch":     ["A", "B", "C", "B", "A"],
     "Sonata":   ["A", "B", "A"],
+    "Ballad":   ["A", "A", "B", "A"],
     "Ballade1": ["A", "B", "C", "D", "C", "D", "E", "F", "A", "B"],
     "Ballade2": ["A", "B", "C", "D", "C", "D", "E", "A", "B", "A", "B"],
     "Ballade3": ["A", "B", "A", "B", "C", "D", "E"],

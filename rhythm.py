@@ -67,6 +67,7 @@ def generate_rhythm(meter, measure_count, show_seperate_measures, rhythm_pdf):
         measures_left -= 1
     return rhythm
 
+
 def merge_pitches_with_rhythm(pitches, rhythm):
     result = ""
     for i in range(len(pitches)):

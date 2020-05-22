@@ -1,6 +1,6 @@
 import random
 
-from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets
+from rhythm import generate_rhythm, replace_some_quarters_with_eights, merge_pitches_with_rhythm, rhythm_pdf_presets
 from modes_and_keys import apply_key
 
 def select_motion():
@@ -75,7 +75,8 @@ def motif_generator(meter, measure_count, span, step_size, modes_key, base, rhyt
 # TOOD: "step_size" doesn't do anything atm
 
 # mode = apply_key("Aeolian", "D")
-# rhythm = generate_rhythm((3,4), 3, False)
+# rhythm = generate_rhythm((3,4), 3, False, {"hn": .33, "qn": .66, "en": .01})
+# rhythm = replace_some_quarters_with_eights(rhythm, 3)
 # print(rhythm)
 # print(generate_pitches(len(rhythm), mode[1], 18, 2, 64))
 # print(motif_generator((3,4), 7, 18, 3, mode[1], 60, rhythm_pdf_presets["default"]))
