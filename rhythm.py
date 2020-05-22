@@ -1,5 +1,10 @@
 import random
 
+# should add up to 1
+rhythm_pdf_presets = {
+    "default": {"hn": .25, "qn": .5, "en": .25},
+}
+
 # meter is a tuple (top, bottom)
 # measure_count is an integer
 
@@ -9,30 +14,27 @@ def check_space(meter, measure_count):
         space_for_repeating = True
     return space_for_repeating
 
-def generate_rhythm_measure(space_left):
+def generate_rhythm_measure(space_left, rhythm_pdf):
     measure = []
+    rhythm_pdf = {"hn": .25, "qn": .5, "en": .25}
+    space_values = {"hn": 2, "qn": 1, "en": .5}
+    pdf = list(rhythm_pdf.values())
+    pmf = [pdf[0]]+[i + sum(pdf[:pdf.index(i)]) for i in pdf[1:]]
+
     while space_left > 0:
-        r = random.randint(0, 3)
-        if r == 0 and space_left > 2:
-            measure.append("hn")
-            space_left -= 2
-        elif (r == 1 or r == 2) and space_left > 1:
-            measure.append("qn")
-            space_left -= 1
-        elif r == 3 and space_left > 1:
-            measure.append("en")
-            measure.append("en")
-            space_left -= 1
-        else:
-            measure.append("en")
-            space_left -= .5
+        r = random.randint(0, 99)
+        p = next(x for x in pmf if x > r)
+        note = list(rhythm_pdf.keys())[list(rhythm_pdf.values()).index(pdf[pmf.index(p)])]
+        measure.append(note)
+        space_left -= space_values[note]
+
     return measure
 
 # Doesn't work with whacky meters (anything other than a base-4 in the denominator)
-def generate_rhythm(meter, measure_count, show_seperate_measures):
+def generate_rhythm(meter, measure_count, show_seperate_measures, rhythm_pdf):
     breathing_space = check_space(meter, measure_count)
     rhythm = []
-    first_measure = generate_rhythm_measure(meter[0]/(meter[1]/4))
+    first_measure = generate_rhythm_measure(meter[0]/(meter[1]/4), rhythm_pdf)
     unique_measures = {tuple(first_measure)}
     if show_seperate_measures:
         first_measure = [first_measure]
@@ -45,7 +47,7 @@ def generate_rhythm(meter, measure_count, show_seperate_measures):
             else:
                 rhythm += random.choice([list(i) for i in unique_measures])
         else:
-            new_measure = generate_rhythm_measure(meter[0]/(meter[1]/4))
+            new_measure = generate_rhythm_measure(meter[0]/(meter[1]/4), rhythm_pdf)
             unique_measures.add(tuple(new_measure))
             if show_seperate_measures:
                 rhythm += [new_measure]

@@ -4,7 +4,8 @@ from functools import reduce
 
 from chord_progression import generate_full_chord_sequence
 from modes_and_keys import apply_key
-from motif_generator import generate_rhythm, merge_pitches_with_rhythm, merge_pitches_with_rhythm
+from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets 
+
 
 def choose_leading_tone(origin, goal):
 	sign = (goal-origin>0) - (goal-origin<0)
@@ -36,7 +37,7 @@ def generate_walking_bass(chords):
 # key = apply_key("Aeolian", "C")[1]
 # seq = generate_full_chord_sequence("minor", key, 40)
 # walk = generate_walking_bass(seq)
-# rhythm = generate_rhythm((3,4), len(seq), False)
+# rhythm = generate_rhythm((3,4), len(seq), False, rhythm_pdf_presets["default"])
 # print(len(seq)*4, len(reduce(lambda x,y: x+y, walk)))
 # print(len(rhythm), len(reduce(lambda x,y: x+y, walk)))
 # b = merge_pitches_with_rhythm(reduce(lambda x,y: x+y, walk), rhythm)

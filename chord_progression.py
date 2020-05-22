@@ -34,12 +34,17 @@ def generate_chord_progression():
     progression = grow_chord_progression(progression)
   return progression
 
+Special_Chord_Progressions = {
+  "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
+  }
 
 def make_full_chord_progression(key):
   result = []
   tonics = generate_chord_progression()
   if key == "minor" or key == "Minor":
     chords = [[0,3,7],[0,3,6],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,3,6]]
+  elif key == "blues" or key == "Blues":
+    chords = [[0,4,7],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,4,7],[0,3,7]]
   else:
     chords = [[0,4,7],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,3,7],[0,3,6]]
   selected_chords = [chords[tonic] for tonic in tonics]
@@ -140,14 +145,14 @@ def find_bridge(start, goal, length, fuller_mode):
 
 
 # TODO: Should this exist?
-def generate_melody_from_tonics(tonics, mode, span, step_tendency, base, meter):
+def generate_melody_from_tonics(tonics, mode, span, step_tendency, base, meter, rhythm_pdf):
   fuller_mode = []
   for i in range(-3, 4):
     for j in range(len(mode)):
       fuller_mode.append(mode[j] + i*12 + base)
   
   # tonics = sway_tonics(tonics, 2)
-  rhythm = generate_rhythm(meter, len(tonics), True)
+  rhythm = generate_rhythm(meter, len(tonics), True, rhythm_pdf)
   pitches = []
 
   for i in range(len(rhythm)):
@@ -169,7 +174,7 @@ def generate_melody_from_tonics(tonics, mode, span, step_tendency, base, meter):
 
 # p = generate_chord_progression()
 # pitches = generate_pitches_from_chords(p, key, 60)
-# mel = generate_melody_from_tonics(pitches, key, 18, 5, 60, (3,4))
+# mel = generate_melody_from_tonics(pitches, key, 18, 5, 60, (3,4), rhythm_pdf_presets["default"])
 
 # key = apply_key("Dorian", "Bb")[1]
 # seq = generate_full_chord_sequence("major", key, 60)

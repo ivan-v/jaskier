@@ -1,6 +1,6 @@
 import random
 
-from rhythm import generate_rhythm, merge_pitches_with_rhythm
+from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets
 from modes_and_keys import apply_key
 
 def select_motion():
@@ -62,9 +62,9 @@ def generate_pitches(length, mode, span, step_size, base):
     return pitches
 
 
-def motif_generator(meter, measure_count, span, step_size, modes_key, base):
+def motif_generator(meter, measure_count, span, step_size, modes_key, base, rhythm_pdf):
 
-    rhythm = generate_rhythm(meter, measure_count, False)
+    rhythm = generate_rhythm(meter, measure_count, False, rhythm_pdf)
     pitches = generate_pitches(len(rhythm), modes_key, span, step_size, base)
 
 #     while is_improvable(pitches):
@@ -78,7 +78,7 @@ def motif_generator(meter, measure_count, span, step_size, modes_key, base):
 # rhythm = generate_rhythm((3,4), 3, False)
 # print(rhythm)
 # print(generate_pitches(len(rhythm), mode[1], 18, 2, 64))
-# print(motif_generator((3,4), 7, 18, 3, mode[1], 60))
+# print(motif_generator((3,4), 7, 18, 3, mode[1], 60, rhythm_pdf_presets["default"]))
 
 
 # fix(pitches)
