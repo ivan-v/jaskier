@@ -2,7 +2,7 @@ import random
 
 # should add up to 1
 rhythm_pdf_presets = {
-    "default": {"hn": .25, "qn": .5, "en": .25},
+    "default": {"hn": .25, "qn": .45, "en": .3},
 }
 
 # meter is a tuple (top, bottom)
@@ -16,17 +16,16 @@ def check_space(meter, measure_count):
 
 def generate_rhythm_measure(space_left, rhythm_pdf):
     measure = []
-    rhythm_pdf = {"hn": .25, "qn": .5, "en": .25}
     space_values = {"hn": 2, "qn": 1, "en": .5}
     pdf = list(rhythm_pdf.values())
-    pmf = [pdf[0]]+[i + sum(pdf[:pdf.index(i)]) for i in pdf[1:]]
-
+    pmf = [(pdf[i] + sum(pdf[0:i])) for i in range(len(pdf))]
     while space_left > 0:
-        r = random.randint(0, 99)
+        r = random.randint(0, 99)/100
         p = next(x for x in pmf if x > r)
         note = list(rhythm_pdf.keys())[list(rhythm_pdf.values()).index(pdf[pmf.index(p)])]
-        measure.append(note)
-        space_left -= space_values[note]
+        if space_left >= space_values[note]:
+            space_left -= space_values[note]
+            measure.append(note)
 
     return measure
 
@@ -58,6 +57,7 @@ def generate_rhythm(meter, measure_count, show_seperate_measures, rhythm_pdf):
 
 def merge_pitches_with_rhythm(pitches, rhythm):
     result = ""
+    print(rhythm)
     for i in range(len(pitches)):
         result += "note " + rhythm[i] + " " + str(pitches[i]) 
         if i < len(pitches)-1:

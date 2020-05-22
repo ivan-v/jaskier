@@ -34,11 +34,13 @@ def generate_walking_bass(chords):
 	return bass
 
 
-# key = apply_key("Aeolian", "C")[1]
-# seq = generate_full_chord_sequence("minor", key, 40)
-# walk = generate_walking_bass(seq)
-# rhythm = generate_rhythm((3,4), len(seq), False, rhythm_pdf_presets["default"])
+key = apply_key("Aeolian", "C")[1]
+seq = generate_full_chord_sequence("minor", key, 40)
+walk = generate_walking_bass(seq)
+rhythm = generate_rhythm((3,4), len(seq)+len(seq)/3, False, rhythm_pdf_presets["default"])
 # print(len(seq)*4, len(reduce(lambda x,y: x+y, walk)))
 # print(len(rhythm), len(reduce(lambda x,y: x+y, walk)))
-# b = merge_pitches_with_rhythm(reduce(lambda x,y: x+y, walk), rhythm)
-# print(b)
+print(len(reduce(lambda x,y: x+y, walk)))
+print(len(rhythm))
+b = merge_pitches_with_rhythm(reduce(lambda x,y: x+y, walk), rhythm)
+print(b)
