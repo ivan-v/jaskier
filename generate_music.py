@@ -15,7 +15,7 @@ Presets = {
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "chords"     : "minor",
     "form"       : Forms["Ballad"],
-    "rhythm_length" : 2,
+    "rhythm_length" : 3,
     "rhythm_repetition_in_mel" : 3,
 }
 
@@ -53,7 +53,7 @@ def generate_song(presets):
     # TODO: FIX problem \/
     #  Warning!: does 1 chord per measure
  
-       melody_length = len(sum(rhythm, []))
+        melody_length = len(sum(rhythm, []))
         melody = generate_pitches(melody_length, applied_key, 18,
                                     presets["base"], chords, rhythm)
     
@@ -68,7 +68,7 @@ def generate_song(presets):
         if i < len(presets["form"])-1:
             song += " :+: "
 
-    song += ":+: note wn " + presets["base"] 
+    song += ":+: note wn " + str(presets["base"]) 
     # rhythmic_backbone = generate_rhythm(presets["meter"],
     #                                     presets["rhythmic_length"], False,
     #                                     presets["rhythm_pdf"])
