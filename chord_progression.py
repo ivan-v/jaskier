@@ -1,7 +1,5 @@
 import random
 
-from functools import reduce
-
 from modes_and_keys import apply_key
 from rhythm import generate_rhythm, merge_pitches_with_rhythm
 
@@ -52,11 +50,9 @@ def make_full_chord_progression(key):
 
 
 def generate_pitches_from_chords(chord_progression, mode, base):
-  fuller_mode = []
-  for i in range(-2, 2):
-    for j in range(len(mode)):
-      fuller_mode.append(mode[j] + i*12)  
-
+  
+  fuller_mode = sum(list(map(lambda x: [i + 12*x for i in mode],
+                             range(-2,2))), [])
   pitches = []
 
   for tonic in chord_progression:
@@ -75,6 +71,17 @@ def generate_full_chord_sequence(key, mode, base):
   chords = make_full_chord_progression(key)
   return generate_pitches_from_chords(chords, mode, base)
 
+
+def available_pitches_in_full_chord(chord):
+  return list(map(lambda x: [i + 12*x for i in chord], range(-2,3)))
+
+
+def available_pitches_in_chords(chords):
+  return [available_pitches_in_full_chord(chord) for chord in chords]
+
+
+# print(key)
+# print(available_pitches_in_chords(generate_full_chord_sequence("minor", key, 60)))
 
 
 def convert_full_chords_to_euterpea(sequence):
@@ -146,10 +153,8 @@ def find_bridge(start, goal, length, fuller_mode):
 
 # TODO: Should this exist?
 def generate_melody_from_tonics(tonics, mode, span, step_tendency, base, meter, rhythm_pdf):
-  fuller_mode = []
-  for i in range(-3, 4):
-    for j in range(len(mode)):
-      fuller_mode.append(mode[j] + i*12 + base)
+  fuller_mode = sum(list(map(lambda x: [i + 12*x for i in mode],
+                             range(-2,2))), [])
   
   # tonics = sway_tonics(tonics, 2)
   rhythm = generate_rhythm(meter, len(tonics), True, rhythm_pdf)
@@ -164,7 +169,7 @@ def generate_melody_from_tonics(tonics, mode, span, step_tendency, base, meter, 
       for j in range(len(rhythm[i])-1):
         pitches.append(fuller_mode[fuller_mode.index(tonics[i])])
 
-  rhythm = reduce(lambda x,y :x+y,rhythm)
+  rhythm = sum(rhythm,[])
   return merge_pitches_with_rhythm(pitches, rhythm)
   
 
