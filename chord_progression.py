@@ -136,6 +136,10 @@ def construct_chord(applied_key, chord_name):
   return chord
 
 
+def convert_chord_names_to_sequence(applied_key, given_chords):
+  return [construct_chord(applied_key, chord) for chord in given_chords]
+
+
 def convert_full_chords_to_euterpea(sequence):
   euterpea_string = ""
   count = 0
