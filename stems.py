@@ -18,13 +18,14 @@ def choose_leading_tone(origin, goal):
 	else:
 		return goal - 1*sign
 
-def generate_walking_bass(chords):
+def generate_walking_bass(chords, meter):
 	bass = []
 	for i in range(len(chords)):
 		measure = []
 		measure.append(chords[i][0])
 		measure.append(random.choice(chords[i][1:]))
-		measure.append(random.choice([i for i in chords[i] if i not in measure]))
+		if meter[0] % 4 == 0:
+			measure.append(random.choice([i for i in chords[i] if i not in measure]))
 		if i < len(chords)-1:
 			measure.append(choose_leading_tone(measure[-1], chords[i+1][0]))
 		else:
@@ -32,14 +33,3 @@ def generate_walking_bass(chords):
 		bass.append(measure)
 	return bass
 
-
-key = apply_key("Aeolian", "C")[1]
-seq = generate_full_chord_sequence("minor", key, 60)
-walk = generate_walking_bass(seq)
-rhythm = generate_rhythm((3,4), len(seq)+2*len(seq)/3,
-						 False, rhythm_pdf_presets["default"])
-rhythm = replace_some_quarters_with_eights(rhythm, 3)
-# print(len(seq)*4, len(reduce(lambda x,y: x+y, walk)))
-# print(len(rhythm), len(reduce(lambda x,y: x+y, walk)))
-b = merge_pitches_with_rhythm(reduce(lambda x,y: x+y, walk), rhythm)
-print(b)
