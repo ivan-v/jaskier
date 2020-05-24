@@ -80,8 +80,60 @@ def available_pitches_in_chords(chords):
   return [available_pitches_in_full_chord(chord) for chord in chords]
 
 
-# print(key)
-# print(available_pitches_in_chords(generate_full_chord_sequence("minor", key, 60)))
+def convert_roman_to_arabic(roman_numeral):
+  switcher = {
+    "i":   0,
+    "ii":  1,
+    "iii": 2,
+    "iv":  3,
+    "v":   4,
+    "vi":  5,
+    "vii": 6,
+  }
+  return switcher[roman_numeral]
+
+
+# expected style of chord_name input: iiidim7, IV, or VI7, etc.
+def construct_chord(applied_key, chord_name):
+  if len(chord_name) > 2 and chord_name[2].lower() == "i":
+    degree = chord_name[:3]
+    d = 3
+  elif chord_name[1].lower() == "i" or chord_name[1].lower() == "v":
+    degree = chord_name[:2]
+    d = 2
+  else:
+    degree = chord_name[:1]
+    d = 1
+  is_minor = degree.islower()
+  tone = convert_roman_to_arabic(degree.lower())
+  
+  num_string = ''.join([i if i.isdigit() else '' for i in chord_name])
+  if num_string:
+    num = int(num_string)
+  else:
+    num = 0
+
+  if is_minor:
+    chord = [0, 3, 7]
+  else:
+    chord = [0, 4, 7]
+
+  if 'dim' in chord_name:
+    chord = [0, 3, 6]
+  elif 'aug' in chord_name:
+    chord = [0, 4, 8]
+
+  if num == 7:
+    if is_minor:
+      chord.append(chord[-1] + 3)
+    else:
+      chord.append(chord[-1] + 4)
+  elif num == 6:
+    chord.append(chord[-1] + 3)
+  elif num == 9:
+    chord.append(chord[-1] + 6)
+  chord = [i + applied_key[1][tone] for i in chord]
+  return chord
 
 
 def convert_full_chords_to_euterpea(sequence):
@@ -152,7 +204,8 @@ def find_bridge(start, goal, length, fuller_mode):
 
 
 # TODO: Should this exist?
-def generate_melody_from_tonics(tonics, mode, span, step_tendency, base, meter, rhythm_pdf):
+def generate_melody_from_tonics(tonics, mode, span, step_tendency, base,
+                                                       meter, rhythm_pdf):
   fuller_mode = sum(list(map(lambda x: [i + 12*x for i in mode],
                              range(-2,2))), [])
   
@@ -164,7 +217,8 @@ def generate_melody_from_tonics(tonics, mode, span, step_tendency, base, meter, 
     space_left = len(rhythm[i])
     pitches.append(tonics[i])
     if i != len(tonics)-1:
-      pitches += find_bridge(tonics[i], tonics[i+1], len(rhythm[i])-1, fuller_mode)
+      pitches += find_bridge(tonics[i], tonics[i+1], len(rhythm[i])-1,
+                                                           fuller_mode)
     else:
       for j in range(len(rhythm[i])-1):
         pitches.append(fuller_mode[fuller_mode.index(tonics[i])])
@@ -172,17 +226,3 @@ def generate_melody_from_tonics(tonics, mode, span, step_tendency, base, meter, 
   rhythm = sum(rhythm,[])
   return merge_pitches_with_rhythm(pitches, rhythm)
   
-
-# print(seq)
-# print(convert_full_chords_to_euterpea(seq))
-
-
-# p = generate_chord_progression()
-# pitches = generate_pitches_from_chords(p, key, 60)
-# mel = generate_melody_from_tonics(pitches, key, 18, 5, 60, (3,4), rhythm_pdf_presets["default"])
-
-# key = apply_key("Dorian", "Bb")[1]
-# seq = generate_full_chord_sequence("major", key, 60)
-
-
-# print(mel)
