@@ -50,8 +50,6 @@ def verify_motion_with_chords(pp, chords, rhythm):
     # return all(sum(g, []))
 
 
-
-
 def select_and_verify_motion(chords, rhythm, pitches, span,
                              previous_motion, mode, base):
     motion = select_motion()
@@ -88,15 +86,9 @@ def generate_pitches(length, mode, span, base, chords, rhythm):
     pitches = [base]
     previous_motion = []
     penultimate_motion = []
-
-    
-
     while len(pitches) < length:
-        
         pitches = select_and_verify_motion(chords, rhythm, pitches, span,
                                            [], mode, base)
-    
-
     return pitches
 
 

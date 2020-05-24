@@ -1,26 +1,28 @@
 import math
 
 from chord_progression import generate_full_chord_sequence, Special_Chords
-from forms import Forms, pick_random_form
+from forms import Forms, pick_random_form, match_parts_to_form
 from modes_and_keys import apply_key
 from motif_generator import generate_pitches
 from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets, replace_some_quarters_with_eights
+from stems import full_walking_bass_over_form, shift_octave
 
 
 Presets = {
     "meter"      : (3,4),
-    "key"        : "Aeolian",
-    "mode"       : "C",
-    "base"       : 61,
+    "key"        : "Ionian",
+    "mode"       : "B",
+    "base"       : 62,
     "rhythm_pdf" : rhythm_pdf_presets["default"],
-    "chords"     : "minor",
+    "chords"     : "major",
     "form"       : Forms["Ballad"],
-    "rhythm_length" : 3,
+    "rhythm_length" : 2,
     "rhythm_repetition_in_mel" : 3,
 }
 
 def repeat_section(section, times):
     return sum([section for i in range(times)], [])
+
 
 def generate_song(presets):
     
@@ -62,25 +64,14 @@ def generate_song(presets):
     
         pieces[part] = merge_pitches_with_rhythm(melody, sum(rhythm,[]))
     
-    song = ""
-    for i in range(len(presets["form"])):
-        song += pieces[presets["form"][i]]
-        if i < len(presets["form"])-1:
-            song += " :+: "
+    bass = full_walking_bass_over_form(presets["form"], parts, presets["meter"])
+    print("Walking Bass", shift_octave(bass, -1))
+    song = match_parts_to_form(presets["form"], pieces)        
 
     song += ":+: note wn " + str(presets["base"]) 
-    # rhythmic_backbone = generate_rhythm(presets["meter"],
-    #                                     presets["rhythmic_length"], False,
-    #                                     presets["rhythm_pdf"])
-    # rhythmic_backbone = replace_some_quarters_with_eights(rhythmic_backbone, 3)
-    # melodic_backbone = generate_pitches(len(rhythmic_backbone)*3,
-    #                                     applied_key, 18, 2, presets["base"])
-    # rhythmic_backbone = repeat_section(rhythmic_backbone,3)
-    # print(merge_pitches_with_rhythm(melodic_backbone, rhythmic_backbone))
-    # print(generate_pitches(len(chords)*3, applied_key, 18, 2, presets["base"]))
-    print(song)
-    return song
 
+    print("Main song", song)
+    return song
 
 
 
