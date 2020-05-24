@@ -1,7 +1,5 @@
 import random
 
-from functools import reduce
-
 from chord_progression import generate_full_chord_sequence
 from modes_and_keys import apply_key
 from rhythm import generate_rhythm, replace_some_quarters_with_eights
