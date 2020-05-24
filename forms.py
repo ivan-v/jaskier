@@ -17,3 +17,12 @@ Forms = {
 def pick_random_form():
     name = random.choice(list(Forms))
     return (name, Forms[name])
+
+
+def match_parts_to_form(form, parts):
+    result = ""
+    for i in range(len(form)):
+        result += parts[form[i]]
+        if i < len(form)-1:
+            result += " :+: "
+    return result
