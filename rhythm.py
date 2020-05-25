@@ -3,6 +3,9 @@ import random
 # should add up to 1
 rhythm_pdf_presets = {
     "default": {"hn": .33, "qn": .66, "en": .01},
+    "eigths_only": {"en": 1},
+    "quarters_only": {"qn": 1},
+    "ties_too": {"(3 % 8)": .35, "qn": .35, "en": .05, "hn": .2, "(3 % 4)": .05},
 }
 
 # meter is a tuple (top, bottom)
@@ -17,7 +20,7 @@ def check_space(meter, measure_count):
 
 def generate_rhythm_measure(space_left, rhythm_pdf):
     measure = []
-    space_values = {"hn": 2, "qn": 1, "en": .5}
+    space_values = {"hn": 2, "qn": 1, "en": .5, "(3 % 8)": 1.5, }
     pdf = list(rhythm_pdf.values())
     pmf = [(pdf[i] + sum(pdf[0:i])) for i in range(len(pdf))]
     while space_left > 0:

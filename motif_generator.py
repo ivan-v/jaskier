@@ -41,7 +41,7 @@ def verify_motion_with_chords(pp, chords, rhythm):
 
     g = sum([[num in av[i] for num in nums[i]] for i in range(len(nums))], [])
     
-    # print('retrying')
+    # TODO: this should be a more complete filter
     for v in g[len(pp)-3:]:
         i = 0
         if v:

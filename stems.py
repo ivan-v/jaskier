@@ -16,6 +16,28 @@ def shift_octave(part, shift):
     return ' '.join(sliced)
 
 
+def generate_arpeggios(presets, parts, pattern):
+    arpeggios = ""
+    if presets["meter"][1] == 4:
+        note = 'qn'
+    else:
+        note = 'en'
+    if pattern == "double upwards":
+        pitches = [sum([val for val in parts[part] for _ in (0, 1)], [])
+                                                       for part in parts]
+    else:
+        pitches = [sum(parts[part], []) for part in parts]
+
+    pieces = {}
+    c = 0
+    for part in parts:
+        pieces[part] = merge_pitches_with_rhythm(pitches[c],
+                                                 [note]*len(pitches[c]))
+        c += 1
+    
+    return match_parts_to_form(presets["form"], pieces)
+
+
 def choose_leading_tone(origin, goal):
     sign = (goal-origin>0) - (goal-origin<0)
 

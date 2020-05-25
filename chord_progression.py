@@ -34,11 +34,14 @@ def generate_chord_progression():
 
 Special_Chords = {
   "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
-  }
+}
 
-def make_full_chord_progression(key):
+def make_full_chord_progression(key, *input_tonics):
   result = []
-  tonics = generate_chord_progression()
+  if input_tonics:
+    tonics = input_tonics[0]
+  else:
+    tonics = generate_chord_progression()
   if key == "minor" or key == "Minor":
     chords = [[0,3,7],[0,3,6],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,3,6]]
   elif key == "blues" or key == "Blues":
@@ -67,8 +70,11 @@ def generate_pitches_from_chords(chord_progression, mode, base):
   return pitches
 
 
-def generate_full_chord_sequence(key, mode, base):
-  chords = make_full_chord_progression(key)
+def generate_full_chord_sequence(key, mode, base, *input_chords):
+  if input_chords:
+    chords = make_full_chord_progression(key, input_chords[0])
+  else:
+    chords = make_full_chord_progression(key)
   return generate_pitches_from_chords(chords, mode, base)
 
 
