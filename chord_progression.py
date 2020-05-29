@@ -1,6 +1,5 @@
 import random
 
-from modes_and_keys import apply_key
 from rhythm import generate_rhythm, merge_pitches_with_rhythm
 
 
@@ -52,30 +51,30 @@ def make_full_chord_progression(key, *input_tonics):
   return [[x + y for x in xs] for xs, y in zip(selected_chords, tonics)]
 
 
-def generate_pitches_from_chords(chord_progression, mode, base):
+def generate_pitches_from_chords(chord_progression, applied_key):
   
-  fuller_mode = sum(list(map(lambda x: [i + 12*x for i in mode],
+  fuller_mode = sum(list(map(lambda x: [i + 12*x for i in applied_key[1][0]],
                              range(-2,2))), [])
   pitches = []
 
   for tonic in chord_progression:
     if type(tonic) is list:
-      chord = [(fuller_mode[int(len(fuller_mode)/2)+tonic[0]] + base)]
+      chord = [(fuller_mode[int(len(fuller_mode)/2)+tonic[0]] + applied_key[1][1])]
       for note in tonic[1:]:
         chord.append(note + chord[0])  
       pitches.append(chord)
     else:
-      pitches.append(fuller_mode[int(len(fuller_mode)/2)+tonic] + base)
+      pitches.append(fuller_mode[int(len(fuller_mode)/2)+tonic] + applied_key[1][1])
 
   return pitches
 
 
-def generate_full_chord_sequence(key, mode, base, *input_chords):
+def generate_full_chord_sequence(key, applied_key, *input_chords):
   if input_chords:
     chords = make_full_chord_progression(key, input_chords[0])
   else:
     chords = make_full_chord_progression(key)
-  return generate_pitches_from_chords(chords, mode, base)
+  return generate_pitches_from_chords(chords, applied_key)
 
 
 def available_pitches_in_full_chord(chord):
@@ -100,7 +99,7 @@ def convert_roman_to_arabic(roman_numeral):
 
 
 # expected style of chord_name input: iiidim7, IV, or VI7, etc.
-def construct_chord(applied_key, chord_name):
+def construct_chord(mode, chord_name):
   if len(chord_name) > 2 and chord_name[2].lower() == "i":
     degree = chord_name[:3]
     d = 3
@@ -138,12 +137,12 @@ def construct_chord(applied_key, chord_name):
     chord.append(chord[-1] + 3)
   elif num == 9:
     chord.append(chord[-1] + 6)
-  chord = [i + applied_key[1][tone] for i in chord]
+  chord = [i + applied_key[1][0][tone] for i in chord]
   return chord
 
 
-def convert_chord_names_to_sequence(applied_key, given_chords):
-  return [construct_chord(applied_key, chord) for chord in given_chords]
+def convert_chord_names_to_sequence(mode, given_chords):
+  return [construct_chord(mode, chord) for chord in given_chords]
 
 
 def convert_full_chords_to_euterpea(sequence):
@@ -214,8 +213,8 @@ def find_bridge(start, goal, length, fuller_mode):
 
 
 # TODO: Should this exist?
-def generate_melody_from_tonics(tonics, mode, span, step_tendency, base,
-                                                       meter, rhythm_pdf):
+def generate_melody_from_tonics(tonics, applied_key, span, mode,
+                                step_tendency, meter, rhythm_pdf):
   fuller_mode = sum(list(map(lambda x: [i + 12*x for i in mode],
                              range(-2,2))), [])
   

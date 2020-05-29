@@ -24,7 +24,32 @@ Modes = {
 
 }
 
+Starting_Pitch = {
+  "C":  60,
+  "Cs": 61,
+  "Db": 61,
+  "D":  62,
+  "Ds": 63,
+  "Eb": 63,
+  "E":  64,
+  "Fb": 64,
+  "Es": 65,
+  "F":  65,
+  "Fs": 66,
+  "Gb": 66,
+  "G":  67,
+  "Gs": 68,
+  "Ab": 68,
+  "A":  69,
+  "As": 70,
+  "Bb": 70,
+  "B":  71,
+  "Cb": 71,
+  "Bs": 60,
+}
 
-def apply_key(mode, key):
+
+
+def apply_key(mode, pitch):
   modulo = Modes[mode] # + Keys[key][i]
-  return (str(key + " " + mode), modulo)
+  return (str(pitch + " " + mode), (modulo, Starting_Pitch[pitch]))

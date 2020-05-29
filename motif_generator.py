@@ -2,7 +2,7 @@ import random
 
 from chord_progression import available_pitches_in_full_chord
 from rhythm import generate_rhythm, replace_some_quarters_with_eights, merge_pitches_with_rhythm, rhythm_pdf_presets
-from modes_and_keys import apply_key
+# from modes_and_keys import apply_key
 
 
 def select_motion():
@@ -51,7 +51,9 @@ def verify_motion_with_chords(pp, chords, rhythm):
 
 
 def select_and_verify_motion(chords, rhythm, pitches, span,
-                             previous_motion, mode, base):
+                               previous_motion, applied_key):
+    base = applied_key[1][1]
+    mode = applied_key[1][0]
     motion = select_motion()
     potential_pitches = []
     fuller_mode = sum(list(map(lambda x: [i + 12*x for i in mode],
@@ -82,36 +84,15 @@ def select_and_verify_motion(chords, rhythm, pitches, span,
 
     return pitches
 
-def generate_pitches(length, mode, span, base, chords, rhythm):
-    pitches = [base]
+def generate_pitches(length, applied_key, span, chords, rhythm):
+    pitches = [applied_key[1][1]]
     previous_motion = []
     penultimate_motion = []
     while len(pitches) < length:
         pitches = select_and_verify_motion(chords, rhythm, pitches, span,
-                                           [], mode, base)
+                                           [], applied_key)
     return pitches
 
 
-def motif_generator(meter, measure_count, span, modes_key, base, rhythm_pdf):
+# TODO: make a better generate_motif
 
-    rhythm = generate_rhythm(meter, measure_count, False, rhythm_pdf)
-    pitches = generate_pitches(len(rhythm), modes_key, span, base)
-
-#     while is_improvable(pitches):
-#         pitches = fix(pitches)
-
-    return merge_pitches_with_rhythm(pitches, rhythm)
-
-# TOOD: "step_size" doesn't do anything atm
-
-# mode = apply_key("Aeolian", "D")
-# rhythm = generate_rhythm((3,4), 3, False, {"hn": .33, "qn": .66, "en": .01})
-# rhythm = replace_some_quarters_with_eights(rhythm, 3)
-# print(rhythm)
-# print(generate_pitches(len(rhythm), mode[1], 18, 2, 64))
-# print(motif_generator((3,4), 7, 18, 3, mode[1], 60, rhythm_pdf_presets["default"]))
-
-
-# fix(pitches)
-
-# is_improvable(pitches)

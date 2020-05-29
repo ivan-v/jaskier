@@ -2,7 +2,6 @@ import random
 
 from chord_progression import generate_full_chord_sequence
 from forms import match_parts_to_form
-from modes_and_keys import apply_key
 from rhythm import generate_rhythm, replace_some_quarters_with_eights
 from rhythm import merge_pitches_with_rhythm, rhythm_pdf_presets 
 

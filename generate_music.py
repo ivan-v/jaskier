@@ -2,7 +2,7 @@ import math
 
 from chord_progression import generate_full_chord_sequence, Special_Chords
 from forms import Forms, pick_random_form, match_parts_to_form
-from modes_and_keys import apply_key
+from modes_and_keys import apply_key, Starting_Pitch
 from motif_generator import generate_pitches
 from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets, replace_some_quarters_with_eights
 from stems import full_walking_bass_over_form, shift_octave, generate_arpeggios
@@ -11,8 +11,7 @@ from stems import full_walking_bass_over_form, shift_octave, generate_arpeggios
 Presets = {
     "meter"      : (3,4),
     "key"        : "Ionian",
-    "mode"       : "B",
-    "base"       : 61,
+    "base"       : "Gb",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "chords"     : "major",
     "form"       : Forms["Ballad"],
@@ -29,13 +28,11 @@ def generate_parts_and_chords(presets, applied_key):
     parts = {}
     for part in presets["form"]:
         if part not in parts:
-            option = generate_full_chord_sequence(presets["chords"],
-                                                  applied_key, presets["base"])
+            option = generate_full_chord_sequence(presets["chords"], applied_key)
             # if chord sequence already exists, make a new one
             while option in list(parts.values()):
-                option = generate_full_chord_sequence(presets["chords"],
-                                                      applied_key,
-                                                      presets["base"])
+                option = generate_full_chord_sequence(presets["chords"], 
+                                                             applied_key)
                                       # Special_Chords["8-bar blues"])
             parts[part] = option
     return parts
@@ -59,8 +56,7 @@ def generate_melody_pieces(presets, parts, applied_key):
         #  Warning!: does 1 chord per measure
  
         melody_length = len(sum(rhythm, []))
-        melody = generate_pitches(melody_length, applied_key, 18,
-                                    presets["base"], chords, rhythm)
+        melody = generate_pitches(melody_length, applied_key, 18, chords, rhythm)
     
         while len(melody) > len(sum(rhythm,[])):
             melody.pop()
@@ -70,7 +66,7 @@ def generate_melody_pieces(presets, parts, applied_key):
 
 def generate_song(presets):
     
-    applied_key = apply_key(presets["key"], presets["mode"])[1]
+    applied_key = apply_key(presets["key"], presets["base"])
     parts = generate_parts_and_chords(presets, applied_key)
 
     arpeggios = generate_arpeggios(presets, parts, "double upwards")
