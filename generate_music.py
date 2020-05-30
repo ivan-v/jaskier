@@ -9,10 +9,10 @@ from stems import full_walking_bass_over_form, shift_octave, generate_arpeggios,
 
 
 Presets = {
-    "meter"      : (4,4),
+    "meter"      : (3,4),
     "key"        : "Aeolian",
-    "base"       : "Cs",
-    "rhythm_pdf" : rhythm_pdf_presets["default"],
+    "base"       : "C",
+    "rhythm_pdf" : rhythm_pdf_presets["eighths_only"],
     "chords"     : "minor",
     "form"       : Forms["Ballad"],
     "rhythm_length" : 2,
@@ -47,14 +47,16 @@ def generate_melody_pieces(presets, parts, applied_key):
                                             True, presets["rhythm_pdf"])
         # rhythmic_backbone = [replace_some_quarters_with_eights(rhythmic_backbone[i], 3)\
                              # for i in range(len(rhythmic_backbone))]
+        print("rhythm length:", presets["rhythm_length"]*math.ceil(len(chords)/len(rhythmic_backbone)))
         rhythmic_backbone = replace_some_quarters_with_eights(rhythmic_backbone, 3)
         rhythm = repeat_section(rhythmic_backbone,
                                 math.ceil(len(chords)/len(rhythmic_backbone)))
+        while(len(rhythm) != len(parts[part])):
+            rhythm = rhythm[:-1]
                                 # presets["rhythm_repetition_in_mel"])
         # TODO: Better selection of # of repetitions for rhythm per melody
         # TODO: FIX problem \/
         #  Warning!: does 1 chord per measure
- 
         melody_length = len(sum(rhythm, []))
         melody = generate_pitches(melody_length, applied_key, 18, chords, rhythm)
 
@@ -77,7 +79,7 @@ def generate_song(presets):
     # print("Walking Bass:", shift_octave(bass, -1))
     print(parts)
     full_bass = full_bass_chords_over_form(presets["form"], parts, presets["meter"])
-    print("Bass:", shift_octave(full_bass, -0))
+    print("Bass:", shift_octave(full_bass, -2))
 
     pieces = generate_melody_pieces(presets, parts, applied_key)
     # print(pieces["A"])

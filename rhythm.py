@@ -3,7 +3,7 @@ import random
 # should add up to 1
 rhythm_pdf_presets = {
     "default": {"hn": .33, "qn": .66, "en": .01},
-    "eigths_only": {"en": 1},
+    "eighths_only": {"en": 1},
     "quarters_only": {"qn": 1},
     "ties_too": {"(3 % 8)": .35, "qn": .35, "en": .05, "hn": .2, "(3 % 4)": .05},
 }

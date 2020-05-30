@@ -48,11 +48,8 @@ def make_full_chord_progression(key, applied_key, *input_tonics):
   else:
     chords = [[0,4,7],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,3,7],[0,3,6]]
   selected_chords = [chords[tonic] for tonic in tonics]
-  print(applied_key)
-  print(list(zip(selected_chords, tonics)))
-  a = [[note + applied_key[1][0][i] + applied_key[1][1] for note in selected_chords[i]] for i in range(len(selected_chords))]
-  print(a)
-  return a#[[x + y for x in xs] for xs, y in zip(selected_chords, tonics)]
+  return [[note + applied_key[1][0][i] + applied_key[1][1]
+           for note in selected_chords[i]] for i in range(len(selected_chords))]
 
 
 def generate_pitches_from_chords(chord_progression, applied_key):
