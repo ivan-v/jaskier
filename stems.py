@@ -8,7 +8,7 @@ from rhythm import merge_pitches_with_rhythm, rhythm_pdf_presets
 
 def shift_octave(part, shift):
     sliced = part.split()
-    pitches = [i.isdigit() for i in sliced]
+    pitches = [i.isdigit() and int(i) > 20 for i in sliced]
     for i in range(len(pitches)):
       if pitches[i]:
         sliced[i] = str(int(sliced[i])+12*shift)
@@ -72,7 +72,6 @@ def provide_walking_bass(parts, meter):
     for part in parts:
         sections[part] = sum(generate_walking_bass(parts[part], meter), [])
     return sections
-    
 
 # we assume that different sections have the same meter
 def full_walking_bass_over_form(form, parts, meter):
@@ -83,3 +82,29 @@ def full_walking_bass_over_form(form, parts, meter):
         sections[section] = " :+: ".join(['note ' + beat + ' ' + str(note)
                                             for note in sections[section]])
     return match_parts_to_form(form, sections)
+
+
+def generate_full_bass(chords, meter, beat):
+    bass = []
+    for i in range(len(chords)):
+        bass.append("(note " + beat + " " + str(chords[i][0]) + " :=: note " 
+                    + beat + " " + str(chords[i][1]) + " :=: note " 
+                    + beat + " " + str(chords[i][2]) + " )")
+    return bass
+
+
+def provide_full_bass(parts, meter, beat):
+    sections = {}
+    for part in parts:
+        sections[part] = " :+: ".join(generate_full_bass(parts[part], meter, beat))
+    return sections
+
+
+def full_bass_chords_over_form(form, parts, meter):
+    beat = "(" + str(meter[0]) + " % " + str(meter[1]) + ")"
+    sections = provide_full_bass(parts, meter, beat)
+    # for section in sections:
+        # sections[section] = " :+: ".join(['note ' + beat + ' ' + str(note)
+                                            # for note in sections[section]])
+    return match_parts_to_form(form, sections)
+    

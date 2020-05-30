@@ -91,6 +91,10 @@ def generate_pitches(length, applied_key, span, chords, rhythm):
     while len(pitches) < length:
         pitches = select_and_verify_motion(chords, rhythm, pitches, span,
                                            [], applied_key)
+    
+    while len(pitches) > length:
+        pitches.pop()
+
     return pitches
 
 

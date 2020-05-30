@@ -35,20 +35,24 @@ Special_Chords = {
   "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
 }
 
-def make_full_chord_progression(key, *input_tonics):
+def make_full_chord_progression(key, applied_key, *input_tonics):
   result = []
   if input_tonics:
     tonics = input_tonics[0]
   else:
     tonics = generate_chord_progression()
   if key == "minor" or key == "Minor":
-    chords = [[0,3,7],[0,3,6],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,3,6]]
+    chords = [[0,3,7],[0,3,6],[0,4,7],[0,3,7],[0,4,7],[0,4,7],[0,3,6]]
   elif key == "blues" or key == "Blues":
     chords = [[0,4,7],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,4,7],[0,3,7]]
   else:
     chords = [[0,4,7],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,3,7],[0,3,6]]
   selected_chords = [chords[tonic] for tonic in tonics]
-  return [[x + y for x in xs] for xs, y in zip(selected_chords, tonics)]
+  print(applied_key)
+  print(list(zip(selected_chords, tonics)))
+  a = [[note + applied_key[1][0][i] + applied_key[1][1] for note in selected_chords[i]] for i in range(len(selected_chords))]
+  print(a)
+  return a#[[x + y for x in xs] for xs, y in zip(selected_chords, tonics)]
 
 
 def generate_pitches_from_chords(chord_progression, applied_key):
@@ -71,10 +75,10 @@ def generate_pitches_from_chords(chord_progression, applied_key):
 
 def generate_full_chord_sequence(key, applied_key, *input_chords):
   if input_chords:
-    chords = make_full_chord_progression(key, input_chords[0])
+    chords = make_full_chord_progression(key, applied_key, input_chords[0])
   else:
-    chords = make_full_chord_progression(key)
-  return generate_pitches_from_chords(chords, applied_key)
+    chords = make_full_chord_progression(key, applied_key)
+  return chords# generate_pitches_from_chords(chords, applied_key)
 
 
 def available_pitches_in_full_chord(chord):

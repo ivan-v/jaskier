@@ -5,15 +5,15 @@ from forms import Forms, pick_random_form, match_parts_to_form
 from modes_and_keys import apply_key, Starting_Pitch
 from motif_generator import generate_pitches
 from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets, replace_some_quarters_with_eights
-from stems import full_walking_bass_over_form, shift_octave, generate_arpeggios
+from stems import full_walking_bass_over_form, shift_octave, generate_arpeggios, full_bass_chords_over_form
 
 
 Presets = {
-    "meter"      : (3,4),
-    "key"        : "Ionian",
-    "base"       : "Gb",
+    "meter"      : (4,4),
+    "key"        : "Aeolian",
+    "base"       : "Cs",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
-    "chords"     : "major",
+    "chords"     : "minor",
     "form"       : Forms["Ballad"],
     "rhythm_length" : 2,
     "rhythm_repetition_in_mel" : 3,
@@ -57,7 +57,7 @@ def generate_melody_pieces(presets, parts, applied_key):
  
         melody_length = len(sum(rhythm, []))
         melody = generate_pitches(melody_length, applied_key, 18, chords, rhythm)
-    
+
         while len(melody) > len(sum(rhythm,[])):
             melody.pop()
         pieces[part] = merge_pitches_with_rhythm(melody, sum(rhythm,[]))
@@ -70,15 +70,20 @@ def generate_song(presets):
     parts = generate_parts_and_chords(presets, applied_key)
 
     arpeggios = generate_arpeggios(presets, parts, "double upwards")
-    print("Arpeggios:", arpeggios)
+    # print("Arpeggios:", arpeggios)
 
     
-    pieces = generate_melody_pieces(presets, parts, applied_key)
     # bass = full_walking_bass_over_form(presets["form"], parts, presets["meter"])
     # print("Walking Bass:", shift_octave(bass, -1))
-    song = match_parts_to_form(presets["form"], pieces)        
+    print(parts)
+    full_bass = full_bass_chords_over_form(presets["form"], parts, presets["meter"])
+    print("Bass:", shift_octave(full_bass, -0))
 
-    song += ":+: note wn " + str(presets["base"]) 
+    pieces = generate_melody_pieces(presets, parts, applied_key)
+    # print(pieces["A"])
+
+    song = match_parts_to_form(presets["form"], pieces)        
+    song += ":+: note wn " + str(Starting_Pitch[presets["base"]]) 
 
     print("Main song:", song)
     return song
