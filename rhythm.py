@@ -20,14 +20,23 @@ def check_space(meter, measure_count):
 
 def generate_rhythm_measure(space_left, rhythm_pdf):
     measure = []
-    space_values = {"hn": 2, "qn": 1, "en": .5, "(3 % 8)": 1.5, }
+    space_values = {"hn": 2, "qn": 1, "en": .5, "(3 % 8)": 1.5, "(1 % 3)": 1.0/3.0}
     pdf = list(rhythm_pdf.values())
     pmf = [(pdf[i] + sum(pdf[0:i])) for i in range(len(pdf))]
     while space_left > 0:
         r = random.randint(0, 99)/100
         p = next(x for x in pmf if x > r)
         note = list(rhythm_pdf.keys())[list(rhythm_pdf.values()).index(pdf[pmf.index(p)])]
-        if space_left >= space_values[note]:
+        if note == "(3 % 8)" and space_left >= 2:
+            space_left -= 2
+            measure.append(note)
+            measure.append("en")
+        elif note == "(1 % 3)" and space_left >= 1:
+            space_left -= 1
+            measure.append(note)
+            measure.append(note)
+            measure.append(note)
+        elif note != "(1 % 3)" and space_left >= space_values[note]:
             space_left -= space_values[note]
             measure.append(note)
     return measure
