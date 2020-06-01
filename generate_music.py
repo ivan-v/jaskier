@@ -1,7 +1,7 @@
 import math
 
 from chord_progression import generate_full_chord_sequence, Special_Chords
-from forms import Forms, pick_random_form, match_parts_to_form
+from forms import Forms, pick_random_form, match_parts_to_form, match_and_alterate_parts_to_form
 from modes_and_keys import apply_key, Starting_Pitch
 from motif_generator import generate_pitches
 from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets, replace_some_quarters_with_eights
@@ -9,12 +9,12 @@ from stems import full_walking_bass_over_form, shift_octave, generate_arpeggios,
 
 
 Presets = {
-    "meter"      : (3,4),
-    "key"        : "Aeolian",
-    "base"       : "C",
-    "rhythm_pdf" : rhythm_pdf_presets["eighths_only"],
-    "chords"     : "minor",
-    "form"       : Forms["Ballad"],
+    "meter"      : (4,4),
+    "key"        : "Ionian",
+    "base"       : "A",
+    "rhythm_pdf" : rhythm_pdf_presets["default"],
+    "chords"     : "major",
+    "form"       : Forms["Ballade"],
     "rhythm_length" : 2,
     "rhythm_repetition_in_mel" : 3,
 }
@@ -47,7 +47,6 @@ def generate_melody_pieces(presets, parts, applied_key):
                                             True, presets["rhythm_pdf"])
         # rhythmic_backbone = [replace_some_quarters_with_eights(rhythmic_backbone[i], 3)\
                              # for i in range(len(rhythmic_backbone))]
-        print("rhythm length:", presets["rhythm_length"]*math.ceil(len(chords)/len(rhythmic_backbone)))
         rhythmic_backbone = replace_some_quarters_with_eights(rhythmic_backbone, 3)
         rhythm = repeat_section(rhythmic_backbone,
                                 math.ceil(len(chords)/len(rhythmic_backbone)))
@@ -77,17 +76,18 @@ def generate_song(presets):
     
     # bass = full_walking_bass_over_form(presets["form"], parts, presets["meter"])
     # print("Walking Bass:", shift_octave(bass, -1))
-    print(parts)
     full_bass = full_bass_chords_over_form(presets["form"], parts, presets["meter"])
-    print("Bass:", shift_octave(full_bass, -2))
+    print("\n")
+    print('> bass :: Music AbsPitch')
+    print("> bass = ", shift_octave(full_bass, -2))
 
     pieces = generate_melody_pieces(presets, parts, applied_key)
-    # print(pieces["A"])
+    # print(pieces)
 
-    song = match_parts_to_form(presets["form"], pieces)        
+    song = match_and_alterate_parts_to_form(presets["form"], pieces)        
     song += ":+: note wn " + str(Starting_Pitch[presets["base"]]) 
-
-    print("Main song:", song)
+    print('> song :: Music AbsPitch')
+    print("> song = ", song)
     return song
 
 
