@@ -11,7 +11,7 @@ def shift_octave(part, shift):
     pitches = [i.isdigit() and int(i) > 20 for i in sliced]
     for i in range(len(pitches)):
       if pitches[i]:
-        sliced[i] = str(int(sliced[i])+12*shift)
+        sliced[i] = str(int(sliced[i])+int(12*shift))
     return ' '.join(sliced)
 
 
@@ -84,7 +84,7 @@ def full_walking_bass_over_form(form, parts, meter):
     return match_parts_to_form(form, sections)
 
 
-def generate_full_bass(chords, meter, beat):
+def basic_full_bass(chords, meter, beat):
     bass = []
     for i in range(len(chords)):
         bass.append("(note " + beat + " " + str(chords[i][0]) + " :=: note " 
@@ -92,6 +92,26 @@ def generate_full_bass(chords, meter, beat):
                     + beat + " " + str(chords[i][2]) + " )")
     return bass
 
+
+def waltz_bass(chords, meter):
+    bass = []
+    if meter[0] == 3 and meter[1] == 8:
+        beat = 'en'
+    else:
+        beat = 'qn'
+    for i in range(len(chords)):
+        bass.append("note " + beat + " " + str(chords[i][0]) + (" :+: (note " 
+                    + beat + " " + str(chords[i][1]+12) + " :=: note " 
+                    + beat + " " + str(chords[i][2]+12) + " )")*2)
+    return bass
+
+
+def generate_full_bass(chords, meter, beat):
+    if meter[0] == 3 or meter[0] == 6:
+        bass = waltz_bass(chords, meter)
+    else:
+        bass = basic_full_bass(chords, meter, beat)
+    return bass
 
 def provide_full_bass(parts, meter, beat):
     sections = {}
@@ -103,8 +123,5 @@ def provide_full_bass(parts, meter, beat):
 def full_bass_chords_over_form(form, parts, meter):
     beat = "(" + str(meter[0]) + " % " + str(meter[1]) + ")"
     sections = provide_full_bass(parts, meter, beat)
-    # for section in sections:
-        # sections[section] = " :+: ".join(['note ' + beat + ' ' + str(note)
-                                            # for note in sections[section]])
     return match_parts_to_form(form, sections)
     

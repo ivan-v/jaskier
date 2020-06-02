@@ -2,6 +2,7 @@ import random
 
 from rhythm import generate_rhythm, merge_pitches_with_rhythm
 
+from modes_and_keys import apply_key, Starting_Pitch 
 
 def grow_chord_progression(progression):
   x = progression
@@ -35,21 +36,27 @@ Special_Chords = {
   "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
 }
 
-def make_full_chord_progression(key, applied_key, *input_tonics):
-  result = []
-  if input_tonics:
-    tonics = input_tonics[0]
-  else:
-    tonics = generate_chord_progression()
-  if key == "minor" or key == "Minor":
-    chords = [[0,3,7],[0,3,6],[0,4,7],[0,3,7],[0,4,7],[0,4,7],[0,3,6]]
-  elif key == "blues" or key == "Blues":
-    chords = [[0,4,7],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,4,7],[0,3,7]]
-  else:
-    chords = [[0,4,7],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,3,7],[0,3,6]]
-  selected_chords = [chords[tonic] for tonic in tonics]
-  return [[note + applied_key[1][0][i] + applied_key[1][1]
-           for note in selected_chords[i]] for i in range(len(selected_chords))]
+# Needs a fair bit of work 
+# def make_full_chord_progression(applied_key, *input_tonics):
+#   result = []
+#   m = applied_key[1][0]
+#   m += [i+12 for i in m]
+#   m += [i+36 for i in m]
+#   m.sort()
+#   if input_tonics:
+#     tonics = input_tonics[0]
+#   else:
+#     tonics = generate_chord_progression()
+#   if m == "Aeolian" or m == "aeolian":
+#     chords = [[0,3,7],[0,3,6],[0,4,7],[0,3,7],[0,4,7],[0,4,7],[0,3,6]]
+#   selected_chords = [[0, m[tonic+2]-m[tonic], m[tonic+4]-m[tonic]] for tonic in tonics]
+#   return [[note + applied_key[1][0][i] + applied_key[1][1]
+#            for note in selected_chords[i]] for i in range(len(selected_chords))]
+
+def make_chord_progression(chord_names):
+  for name in chord_names:
+    pass
+  return
 
 
 def generate_pitches_from_chords(chord_progression, applied_key):
@@ -70,11 +77,11 @@ def generate_pitches_from_chords(chord_progression, applied_key):
   return pitches
 
 
-def generate_full_chord_sequence(key, applied_key, *input_chords):
+def generate_full_chord_sequence(applied_key, *input_chords):
   if input_chords:
-    chords = make_full_chord_progression(key, applied_key, input_chords[0])
+    chords = make_full_chord_progression(applied_key, input_chords[0])
   else:
-    chords = make_full_chord_progression(key, applied_key)
+    chords = make_full_chord_progression(applied_key)
   return chords# generate_pitches_from_chords(chords, applied_key)
 
 
@@ -99,20 +106,7 @@ def convert_roman_to_arabic(roman_numeral):
   return switcher[roman_numeral]
 
 
-# expected style of chord_name input: iiidim7, IV, or VI7, etc.
-def construct_chord(mode, chord_name):
-  if len(chord_name) > 2 and chord_name[2].lower() == "i":
-    degree = chord_name[:3]
-    d = 3
-  elif chord_name[1].lower() == "i" or chord_name[1].lower() == "v":
-    degree = chord_name[:2]
-    d = 2
-  else:
-    degree = chord_name[:1]
-    d = 1
-  is_minor = degree.islower()
-  tone = convert_roman_to_arabic(degree.lower())
-  
+def construct_chord(offset, chord_name, is_minor):
   num_string = ''.join([i if i.isdigit() else '' for i in chord_name])
   if num_string:
     num = int(num_string)
@@ -124,26 +118,95 @@ def construct_chord(mode, chord_name):
   else:
     chord = [0, 4, 7]
 
-  if 'dim' in chord_name:
+  if "dim" in chord_name:
     chord = [0, 3, 6]
-  elif 'aug' in chord_name:
+  elif "aug" in chord_name:
     chord = [0, 4, 8]
 
   if num == 7:
     if is_minor:
       chord.append(chord[-1] + 3)
+    elif "dim" in chord_name:
+      chord.append(chord[-1] + 2)
+    elif "maj" in chord_name:
+      chord.append(chord[-1] + 4)
+    else:
+      chord.append(chord[-1] + 3)
+  elif num == 6:
+    chord.append(chord[-1] + 2)
+  elif num == 9:
+    if is_minor:
+      chord.append(chord[-1] + 3)
+    elif "dim" in chord_name:
+      chord.append(chord[-1] + 2)
+    elif "maj" in chord_name:
+      chord.append(chord[-1] + 4)
+    else:
+      chord.append(chord[-1] + 3)
+    if "maj" in chord_name:
+      chord.append(chord[-1] + 3)
     else:
       chord.append(chord[-1] + 4)
-  elif num == 6:
+  elif num == 11:
+    if is_minor:
+      chord.append(chord[-1] + 3)
+    elif "dim" in chord_name:
+      chord.append(chord[-1] + 2)
+    elif "maj" in chord_name:
+      chord.append(chord[-1] + 4)
+    else:
+      chord.append(chord[-1] + 3)
+    if "maj" in chord_name:
+      chord.append(chord[-1] + 3)
+    else:
+      chord.append(chord[-1] + 4)
     chord.append(chord[-1] + 3)
-  elif num == 9:
-    chord.append(chord[-1] + 6)
-  chord = [i + applied_key[1][0][tone] for i in chord]
-  return chord
+
+  return [i + offset for i in chord]
 
 
-def convert_chord_names_to_sequence(mode, given_chords):
-  return [construct_chord(mode, chord) for chord in given_chords]
+# applied_key needed for this way/style.
+# expected style of chord_name input: iiidim7, IV, or VI7, etc.
+def construct_chord_from_roman(applied_key, chord_name):
+  if len(chord_name) == 1:
+    degree = chord_name
+    d = 1
+  elif len(chord_name) > 2 and chord_name[2].lower() == "i":
+    degree = chord_name[:3]
+    d = 3
+  elif chord_name[1].lower() == "i" or chord_name[1].lower() == "v":
+    degree = chord_name[:2]
+    d = 2
+  else:
+    degree = chord_name[:1]
+    d = 1
+  is_minor = degree.islower()
+  tone = convert_roman_to_arabic(degree.lower())
+  offset = applied_key[1][0][tone] + applied_key[1][0]
+ 
+  return construct_chord(offset, chord_name, is_minor)
+
+# accepts style Amin7, Ddim7, Cb9, Cbmaj11
+def construct_chord_from_name(chord_name):
+  if chord_name[:2] in Starting_Pitch:
+    name = chord_name[:2]
+  elif chord_name[:1] in Starting_Pitch:
+    name = chord_name[:1]
+  else:
+    print("Error: chord (starting pitch) name not found")
+
+  offset = Starting_Pitch[name]
+  is_minor = 'm' in chord_name and (chord_name.index('m') >= len(chord_name)-3\
+             or chord_name[chord_name.index('m') + 2] != 'j')
+
+  return construct_chord(offset, chord_name, is_minor)
+
+def convert_roman_chord_names_to_sequence(mode, given_chords):
+  return [construct_chord_from_roman(mode, chord) for chord in given_chords]
+
+def convert_chord_names_to_sequence(given_chords):
+  return [construct_chord_from_name(chord) for chord in given_chords]
+
 
 
 def convert_full_chords_to_euterpea(sequence):
@@ -163,7 +226,17 @@ def convert_full_chords_to_euterpea(sequence):
       euterpea_string += ":+: "
   return euterpea_string
 
+a = convert_chord_names_to_sequence(['Am', 'G', 'Fmaj7', 'Em', 
+  'Dm7', 'G7', 'Cmaj7', 'Bbmaj7', 'Bm11', 'E7', 'Am', 'G', 'Fmaj7', 'Em', 
+  'Dm7', 'G7', 'Cmaj7'])
+# print(a)
+av = [sum(chord, []) for chord in available_pitches_in_chords(a)]
+print(av)
+# print(convert_full_chords_to_euterpea(a))
+ 
 
+
+# not currently used
 def sway_tonics(tonics, step_tendency):
   for i in range(len(tonics)):
     r = random.randint(0, step_tendency)
@@ -181,6 +254,7 @@ def sway_tonics(tonics, step_tendency):
       pass
   return tonics
 
+# not currently used
 def find_bridge(start, goal, length, fuller_mode):
   if fuller_mode.index(goal) > fuller_mode.index(start):
     path = fuller_mode[fuller_mode.index(start):fuller_mode.index(goal)]
@@ -211,28 +285,3 @@ def find_bridge(start, goal, length, fuller_mode):
         element = random.choice(path)
       path.insert(path.index(element), element)
     return path
-
-
-# TODO: Should this exist?
-def generate_melody_from_tonics(tonics, applied_key, span, mode,
-                                step_tendency, meter, rhythm_pdf):
-  fuller_mode = sum(list(map(lambda x: [i + 12*x for i in mode],
-                             range(-2,2))), [])
-  
-  # tonics = sway_tonics(tonics, 2)
-  rhythm = generate_rhythm(meter, len(tonics), True, rhythm_pdf)
-  pitches = []
-
-  for i in range(len(rhythm)):
-    space_left = len(rhythm[i])
-    pitches.append(tonics[i])
-    if i != len(tonics)-1:
-      pitches += find_bridge(tonics[i], tonics[i+1], len(rhythm[i])-1,
-                                                           fuller_mode)
-    else:
-      for j in range(len(rhythm[i])-1):
-        pitches.append(fuller_mode[fuller_mode.index(tonics[i])])
-
-  rhythm = sum(rhythm,[])
-  return merge_pitches_with_rhythm(pitches, rhythm)
-  

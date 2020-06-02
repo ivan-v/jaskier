@@ -9,14 +9,14 @@ from stems import full_walking_bass_over_form, shift_octave, generate_arpeggios,
 
 
 Presets = {
-    "meter"      : (4,4),
+    "meter"      : (3,4),
     "key"        : "Ionian",
-    "base"       : "A",
+    "base"       : "E",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
-    "chords"     : "major",
     "form"       : Forms["Ballade"],
     "rhythm_length" : 2,
     "rhythm_repetition_in_mel" : 3,
+    "repetitions_in_part" : 2,
 }
 
 
@@ -28,13 +28,12 @@ def generate_parts_and_chords(presets, applied_key):
     parts = {}
     for part in presets["form"]:
         if part not in parts:
-            option = generate_full_chord_sequence(presets["chords"], applied_key)
+            option = generate_full_chord_sequence(applied_key)
             # if chord sequence already exists, make a new one
             while option in list(parts.values()):
-                option = generate_full_chord_sequence(presets["chords"], 
-                                                             applied_key)
+                option = generate_full_chord_sequence(applied_key)
                                       # Special_Chords["8-bar blues"])
-            parts[part] = option
+            parts[part] = repeat_section(option, presets["repetitions_in_part"])
     return parts
 
 
@@ -50,9 +49,8 @@ def generate_melody_pieces(presets, parts, applied_key):
         rhythmic_backbone = replace_some_quarters_with_eights(rhythmic_backbone, 3)
         rhythm = repeat_section(rhythmic_backbone,
                                 math.ceil(len(chords)/len(rhythmic_backbone)))
-        while(len(rhythm) != len(parts[part])):
+        while(len(rhythm) != len(parts[part])/presets["repetitions_in_part"]):
             rhythm = rhythm[:-1]
-                                # presets["rhythm_repetition_in_mel"])
         # TODO: Better selection of # of repetitions for rhythm per melody
         # TODO: FIX problem \/
         #  Warning!: does 1 chord per measure
@@ -61,7 +59,15 @@ def generate_melody_pieces(presets, parts, applied_key):
 
         while len(melody) > len(sum(rhythm,[])):
             melody.pop()
-        pieces[part] = merge_pitches_with_rhythm(melody, sum(rhythm,[]))
+
+        bit = merge_pitches_with_rhythm(melody, sum(rhythm,[]))
+        melody = bit
+        for i in range(presets["repetitions_in_part"]):
+            if i < presets["repetitions_in_part"]-1:
+                melody += ' :+: '
+                melody += bit              
+
+        pieces[part] = melody #merge_pitches_with_rhythm(melody, sum(rhythm,[]))
 
     return pieces
 
@@ -87,7 +93,7 @@ def generate_song(presets):
     song = match_and_alterate_parts_to_form(presets["form"], pieces)        
     song += ":+: note wn " + str(Starting_Pitch[presets["base"]]) 
     print('> song :: Music AbsPitch')
-    print("> song = ", song)
+    print("> song = ", shift_octave(song, 0))
     return song
 
 
