@@ -226,16 +226,6 @@ def convert_full_chords_to_euterpea(sequence):
       euterpea_string += ":+: "
   return euterpea_string
 
-a = convert_chord_names_to_sequence(['Am', 'G', 'Fmaj7', 'Em', 
-  'Dm7', 'G7', 'Cmaj7', 'Bbmaj7', 'Bm11', 'E7', 'Am', 'G', 'Fmaj7', 'Em', 
-  'Dm7', 'G7', 'Cmaj7'])
-# print(a)
-av = [sum(chord, []) for chord in available_pitches_in_chords(a)]
-print(av)
-# print(convert_full_chords_to_euterpea(a))
- 
-
-
 # not currently used
 def sway_tonics(tonics, step_tendency):
   for i in range(len(tonics)):
@@ -254,34 +244,3 @@ def sway_tonics(tonics, step_tendency):
       pass
   return tonics
 
-# not currently used
-def find_bridge(start, goal, length, fuller_mode):
-  if fuller_mode.index(goal) > fuller_mode.index(start):
-    path = fuller_mode[fuller_mode.index(start):fuller_mode.index(goal)]
-  else:
-    path = fuller_mode[fuller_mode.index(goal):fuller_mode.index(start)]
-    path.reverse()
-  if length == len(path):
-    return path
-  elif length == len(path)-1:
-    return path[1:]
-  elif length == len(path)-2:
-    return path[1:-1]
-  elif length == len(path)*2:
-    return [val for val in path for _ in (0,1)]
-  elif length < len(path):
-    path = path[1:-1]
-    while len(path) != length:
-      path.remove(random.choice(path[1:-1]))
-    return path
-  else:
-    # duplicate an element at random
-    while len(path) != length:
-      if len(path) > 2:
-        element = random.choice(path[1:-1])
-      elif len(path) > 1:
-        element = random.choice(path[1:])
-      else:
-        element = random.choice(path)
-      path.insert(path.index(element), element)
-    return path

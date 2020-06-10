@@ -55,11 +55,11 @@ def select_and_verify_motion(chords, rhythm, pitches, span,
 
     return pitches
 
-def generate_pitches(length, applied_key, span, chords, rhythm):
+def generate_pitches(length, base, span, chords, rhythm):
     av = [sum(chord, []) for chord in available_pitches_in_chords(chords)]
     ap = sum([[av[i] for note in rhythm[i]] for i in range(len(rhythm))], [])
     
-    pitches = [applied_key[1][1]]
+    pitches = [base]
     previous_motion = []
     previous_motion = []
     out_of_range = True
@@ -86,7 +86,7 @@ def generate_pitches(length, applied_key, span, chords, rhythm):
                 else:
                     new_tones.append(available[m + available.index(prev)])
 
-            out_of_range = span/2 < abs(new_tones[-1] - applied_key[1][1])
+            out_of_range = span/2 < abs(new_tones[-1] - base)
 
         previous_motion = motion
         pitches += new_tones
