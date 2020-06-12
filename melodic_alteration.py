@@ -2,6 +2,9 @@ import random
 
 from modes_and_keys import apply_key, Modes, Starting_Pitch
 from rhythm import merge_pitches_with_rhythm
+from statistics import stdev # for getting passing tones smoother in duration
+
+from chord_progression import available_pitches_in_full_chord
 
 test_pieces = {
     'A': 'note qn 71 :+: note qn 70 :+: note hn 66 :+: note qn 71 :+: note en 75 :+: note en 76 :+: note en 75 :+: note en 73 :+: note en 68 :+: note en 71 :+: note en 73 :+: note en 71 :+: note en 70 :+: note en 73 :+: note en 70 :+: note en 76 :+: note en 73 :+: note en 70 :+: note en 66 :+: note en 68 :+: note en 66 :+: note en 64 :+: note en 64 :+: note en 64', 
@@ -109,26 +112,85 @@ def check_space_for_insert(start, goal, fuller_mode, min_distance):
     return abs(goal_index - start_index) > min_distance
 
 
-def insert_passing_tones(sequence, min_distance):
-# How to infer applied_key from only chord progression??
-    applied_key = apply_key("Ionian", "C")
-    mode = applied_key[1][0]
-    base = applied_key[1][1]
-    fuller_mode = [j + base for j in sum(list(map(lambda x: 
-                                                  [i + 12*x for i in mode],
-                                                           range(-3,2))),[])]
-    to_insert = []
+def subset_sum(numbers, target, output, partial=[]):
+  s = sum(partial)
+  if s == target: 
+    output.append(partial)
+  if s >= target:
+    return
+  for i in range(len(numbers)):
+    n = numbers[i]
+    remaining = numbers[i+1:]
+    subset_sum(remaining, target, output, partial + [n]) 
+  return output
+
+def right_length(item):
+  if len(item) == 3:
+    return True
+  else:
+    return False
+
+def min_dur(item, min_duration):
+    for entry in item:
+        if entry < min_duration:
+            return False
+    return True
+
+Space_Values = {"hn": 2, "qn": 1, "en": .5, "(3 % 8)": 1.5, "(1 % 3)": 1.0/3.0}
+
+def lookup_in_space_values(duration):
+  return list(Space_Values.keys())[list(Space_Values.values()).index(duration)]
+
+
+def check_timing_for_insert(first_note, second_note, min_duration):
+    total_time = Space_Values[first_note] + Space_Values[second_note]
+    if total_time < min_duration*3:
+        return False
+    else:
+        lengths = list(Space_Values.values())
+        all_lengths = [lengths[i//3] for i in range(len(lengths)*3)]
+        b1 = list(filter(right_length, subset_sum(all_lengths, 3, [])))
+        b2 = list(filter(lambda dur: min_dur(dur, min_duration), b1))
+        c = list(map(lambda x: stdev(x), b2))
+        if c == []:
+            return False
+        else:
+            return list(map(lambda x: lookup_in_space_values(x),
+                                               b2[c.index(min(c))]))
+
+
+def insert_passing_tones(sequence, min_distance, min_duration, chords, meter):
+    to_insert   = []
+    time_insert = []
+    measure_timer = 0
+    chords_count = 0
+    cach = []
     for i in range(0, len(sequence[0])-1):
+        if Space_Values[sequence[1][i]]*(meter[1]/4) + measure_timer > meter[0]:
+            measure_timer = Space_Values[sequence[1][i]]*(meter[1]/4)
+            chords_count += 1
+            cach = [sequence[1][i]]
+        else:
+            measure_timer += Space_Values[sequence[1][i]]*(meter[1]/4)
+            cach.append(sequence[1][i])
+        fuller_mode = sum(available_pitches_in_full_chord(chords[chords_count]), [])
         if check_space_for_insert(sequence[0][i], sequence[0][i+1],
                                           fuller_mode, min_distance):
             pitch = find_bridge(sequence[0][i], sequence[0][i+1], 1, fuller_mode)
-            to_insert.append([pitch, i+1])
+            insert = check_timing_for_insert(sequence[1][i], sequence[1][i+1], min_duration)
+            if insert:
+                time_insert.append(insert)
+                to_insert.append([pitch, i+1])
 
     for i in range(len(to_insert)):
         sequence[0].insert(to_insert[i][1]+i, to_insert[i][0])
-    # print(sequence[0])
+        sequence[1][to_insert[i][1]+i-1] = time_insert[i][0]
+        sequence[1][to_insert[i][1]+i] = time_insert[i][2]
+        sequence[1].insert(to_insert[i][1]+i, time_insert[i][1])
 
-# insert_passing_tones(strip_part(test_pieces['A']), 2)
+    return sequence
+
+# insert_passing_tones(strip_part(test_pieces['A']), 2, .5)
 
 def is_rhythm_constant(sequence):
     return sequence[1][1:] == sequence[1][:-1]
