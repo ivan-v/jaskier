@@ -2,6 +2,7 @@ import math
 
 from chord_progression import convert_chord_names_to_sequence, generate_full_chord_sequence, Special_Chords
 from forms import Forms, pick_random_form, match_parts_to_form, match_and_alterate_parts_to_form
+from melodic_alteration import insert_passing_tones, strip_part
 from modes_and_keys import apply_key, Starting_Pitch
 from motif_generator import generate_pitches
 from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets, replace_some_quarters_with_eights
@@ -9,7 +10,7 @@ from stems import full_walking_bass_over_form, shift_octave, generate_arpeggios,
 
 
 Presets = {
-    "meter"      : (3,4),
+    "meter"      : (4,4),
     "key"        : "Ionian",
     "base"       : "E",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
@@ -49,8 +50,8 @@ def generate_melody_pieces(presets, parts):
         rhythmic_backbone = replace_some_quarters_with_eights(rhythmic_backbone, 3)
         rhythm = repeat_section(rhythmic_backbone,
                                 math.ceil(len(chords)/len(rhythmic_backbone)))
-        while(len(rhythm) < len(parts[part])/presets["repetitions_in_part"]):
-            rhythm = rhythm[:-1]
+        # while(len(rhythm) < len(parts[part])/presets["repetitions_in_part"]):
+            # rhythm = rhythm[:-1]
         if len(chords)-len(rhythm) < 0:
             while len(rhythm) != len(chords):
                 rhythm.pop()
@@ -69,9 +70,12 @@ def generate_melody_pieces(presets, parts):
         for i in range(presets["repetitions_in_part"]):
             if i < presets["repetitions_in_part"]-1:
                 melody += ' :+: '
-                melody += bit              
-
-        pieces[part] = melody #merge_pitches_with_rhythm(melody, sum(rhythm,[]))
+                melody += bit
+                chords += chords
+                # chords.append(chords[0])
+        print(len(chords))
+        with_passing_tones = insert_passing_tones(strip_part(melody), 2, .5, chords, presets["meter"])
+        pieces[part] = merge_pitches_with_rhythm(with_passing_tones[0], with_passing_tones[1])
 
     return pieces
 

@@ -4,6 +4,8 @@ from modes_and_keys import apply_key, Modes, Starting_Pitch
 from rhythm import merge_pitches_with_rhythm
 from statistics import stdev # for getting passing tones smoother in duration
 
+from chord_progression import available_pitches_in_full_chord
+
 test_pieces = {
     'A': 'note qn 71 :+: note qn 70 :+: note hn 66 :+: note qn 71 :+: note en 75 :+: note en 76 :+: note en 75 :+: note en 73 :+: note en 68 :+: note en 71 :+: note en 73 :+: note en 71 :+: note en 70 :+: note en 73 :+: note en 70 :+: note en 76 :+: note en 73 :+: note en 70 :+: note en 66 :+: note en 68 :+: note en 66 :+: note en 64 :+: note en 64 :+: note en 64', 
     'B': 'note en 71 :+: note en 71 :+: note en 75 :+: note en 71 :+: note en 73 :+: note en 75 :+: note en 76 :+: note en 76 :+: note en 80 :+: note en 83 :+: note en 80 :+: note en 73 :+: note en 76 :+: note en 80 :+: note en 78 :+: note en 82 :+: note en 78 :+: note en 76 :+: note en 73 :+: note en 76 :+: note en 80 :+: note en 76 :+: note en 73 :+: note en 76'
@@ -157,18 +159,21 @@ def check_timing_for_insert(first_note, second_note, min_duration):
                                                b2[c.index(min(c))]))
 
 
-def insert_passing_tones(sequence, min_distance, min_duration):
-# How to infer applied_key from only chord progression??
-    applied_key = apply_key("Ionian", "C")
-    mode = applied_key[1][0]
-    base = applied_key[1][1]
-    fuller_mode = [j + base for j in sum(list(map(lambda x: 
-                                                  [i + 12*x for i in mode],
-                                                           range(-3,2))),[])]
+def insert_passing_tones(sequence, min_distance, min_duration, chords, meter):
     to_insert   = []
     time_insert = []
+    measure_timer = 0
+    chords_count = 0
+    cach = []
     for i in range(0, len(sequence[0])-1):
-            
+        if Space_Values[sequence[1][i]]*(meter[1]/4) + measure_timer > meter[0]:
+            measure_timer = Space_Values[sequence[1][i]]*(meter[1]/4)
+            chords_count += 1
+            cach = [sequence[1][i]]
+        else:
+            measure_timer += Space_Values[sequence[1][i]]*(meter[1]/4)
+            cach.append(sequence[1][i])
+        fuller_mode = sum(available_pitches_in_full_chord(chords[chords_count]), [])
         if check_space_for_insert(sequence[0][i], sequence[0][i+1],
                                           fuller_mode, min_distance):
             pitch = find_bridge(sequence[0][i], sequence[0][i+1], 1, fuller_mode)
