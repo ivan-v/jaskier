@@ -1,8 +1,7 @@
 import random
 
-from rhythm import generate_rhythm, merge_pitches_with_rhythm
-
 from modes_and_keys import apply_key, Starting_Pitch 
+from rhythm import generate_rhythm, merge_pitches_with_rhythm
 
 def grow_chord_progression(progression):
   x = progression
@@ -207,24 +206,6 @@ def convert_roman_chord_names_to_sequence(mode, given_chords):
 def convert_chord_names_to_sequence(given_chords):
   return [construct_chord_from_name(chord) for chord in given_chords]
 
-
-
-def convert_full_chords_to_euterpea(sequence):
-  euterpea_string = ""
-  count = 0
-  for chord in sequence:
-    chord_string = "("
-    for note in chord:
-      chord_string += "note qn " + str(note)
-      if note is not chord[-1]:
-        chord_string += " :=: "
-      else:
-        chord_string += ") "
-    euterpea_string += chord_string
-    count += 1
-    if count < len(sequence):
-      euterpea_string += ":+: "
-  return euterpea_string
 
 # not currently used
 def sway_tonics(tonics, step_tendency):

@@ -1,10 +1,10 @@
 import random
 
+from chord_progression import available_pitches_in_full_chord
 from modes_and_keys import apply_key, Modes, Starting_Pitch
 from rhythm import merge_pitches_with_rhythm
 from statistics import stdev # for getting passing tones smoother in duration
 
-from chord_progression import available_pitches_in_full_chord
 
 test_pieces = {
     'A': 'note qn 71 :+: note qn 70 :+: note hn 66 :+: note qn 71 :+: note en 75 :+: note en 76 :+: note en 75 :+: note en 73 :+: note en 68 :+: note en 71 :+: note en 73 :+: note en 71 :+: note en 70 :+: note en 73 :+: note en 70 :+: note en 76 :+: note en 73 :+: note en 70 :+: note en 66 :+: note en 68 :+: note en 66 :+: note en 64 :+: note en 64 :+: note en 64', 
