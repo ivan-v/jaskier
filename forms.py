@@ -1,6 +1,6 @@
 import random
 
-from melodic_alteration import alterate_part
+from melodic_alteration import alter_part
 
 Forms = {
     "One-part": ["A"],
@@ -23,15 +23,14 @@ def pick_random_form():
 
 
 def match_parts_to_form(form, parts):
-    result = ""
+    result = []
     for i in range(len(form)):
-        result += parts[form[i]]
-        if i < len(form)-1:
-            result += " :+: "
+        result += part[form[i]]
     return result
 
-def match_and_alterate_parts_to_form(form, parts):
-    result = ""
+
+def match_and_alter_parts_to_form(form, parts):
+    result = []
     introduced = []
     alterated = []
     for i in range(len(form)):
@@ -41,11 +40,10 @@ def match_and_alterate_parts_to_form(form, parts):
         elif i == len(form)-1:
             result += parts[form[i]]
         else:
-            option = alterate_part(parts[form[i]])
+            option = alter_part(parts[form[i]])
             while option in alterated:    
-                option = alterate_part(parts[form[i]])
+                option = alter_part(parts[form[i]])
             alterated += [option]
             result += option
-        if i < len(form)-1:
-            result += " :+: "
     return result
+

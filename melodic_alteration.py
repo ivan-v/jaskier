@@ -2,26 +2,17 @@ import random
 
 from chord_progression import available_pitches_in_full_chord
 from modes_and_keys import apply_key, Modes, Starting_Pitch
-from rhythm import merge_pitches_with_rhythm
+from rhythm import merge_pitches_with_rhythm, Space_Values
 from statistics import stdev # for getting passing tones smoother in duration
 
 
-test_pieces = {
-    'A': 'note qn 71 :+: note qn 70 :+: note hn 66 :+: note qn 71 :+: note en 75 :+: note en 76 :+: note en 75 :+: note en 73 :+: note en 68 :+: note en 71 :+: note en 73 :+: note en 71 :+: note en 70 :+: note en 73 :+: note en 70 :+: note en 76 :+: note en 73 :+: note en 70 :+: note en 66 :+: note en 68 :+: note en 66 :+: note en 64 :+: note en 64 :+: note en 64', 
-    'B': 'note en 71 :+: note en 71 :+: note en 75 :+: note en 71 :+: note en 73 :+: note en 75 :+: note en 76 :+: note en 76 :+: note en 80 :+: note en 83 :+: note en 80 :+: note en 73 :+: note en 76 :+: note en 80 :+: note en 78 :+: note en 82 :+: note en 78 :+: note en 76 :+: note en 73 :+: note en 76 :+: note en 80 :+: note en 76 :+: note en 73 :+: note en 76'
-}
-
-testy = "note qn 64 :+: note qn 72 :+: note qn 72 :+: note hn 72 :+: note qn 72 :+: note qn 71 :+: note qn 65 :+: note qn 71 :+: note hn 72 :+: note qn 67 :+: note qn 67 :+: note qn 69 :+: note qn 67 :+: note hn 60 :+: note qn 60 :+: note qn 60 :+: note qn 67 :+: note qn 67 :+: note hn 60 :+: note qn 58 :+: note qn 69 :+: note qn 73 :+: note qn 69 :+: note hn 69 :+: note qn 71 :+: note qn 69 :+: note qn 60 :+: note qn 52 :+: note hn 52 :+: note qn 55 :+: note qn 62 :+: note qn 72 :+: note qn 65 :+: note hn 57 :+: note qn 64 :+: note qn 64 :+: note qn 60 :+: note qn 57 :+: note hn 62 :+: note qn 62 :+: note qn 62 :+: note qn 67 :+: note qn 71 :+: note qn 64 :+: note qn 72 :+: note qn 72 :+: note hn 72 :+: note qn 72 :+: note qn 71 :+: note qn 65 :+: note qn 71 :+: note hn 72 :+: note qn 67 :+: note qn 67 :+: note qn 69 :+: note qn 67 :+: note hn 60 :+: note qn 60 :+: note qn 60 :+: note qn 67 :+: note qn 67 :+: note hn 60 :+: note qn 58 :+: note qn 69 :+: note qn 73 :+: note qn 69 :+: note hn 69 :+: note qn 71 :+: note qn 69 :+: note qn 60 :+: note qn 52 :+: note hn 52 :+: note qn 55 :+: note qn 62 :+: note qn 72 :+: note qn 65 :+: note hn 57 :+: note qn 64 :+: note qn 64 :+: note qn 60 :+: note qn 57 :+: note hn 62 :+: note qn 62 :+: note qn 62 :+: note qn 67 :+: note qn 71:+: note wn 64"
-
 def strip_part(part):
+    melody = []
     rhythm = []
-    pitches = []
-    for bit in part.split(' '):
-        if bit.isdigit():
-            pitches.append(int(bit))
-        elif bit != ":+:" and bit != "note":
-            rhythm.append(bit)
-    return (pitches, rhythm)
+    for note in part:
+        melody.append(note[0])
+        rhythm.append(note[1])
+    return (melody, rhythm)
 
 
 def infer_key(pitches):
@@ -136,7 +127,6 @@ def min_dur(item, min_duration):
             return False
     return True
 
-Space_Values = {"hn": 2, "qn": 1, "en": .5, "(3 % 8)": 1.5, "(1 % 3)": 1.0/3.0}
 
 def lookup_in_space_values(duration):
   return list(Space_Values.keys())[list(Space_Values.values()).index(duration)]
@@ -165,7 +155,7 @@ def insert_passing_tones(sequence, min_distance, min_duration, chords, meter):
     measure_timer = 0
     chords_count = 0
     cach = []
-    for i in range(0, len(sequence[0])-1):
+    for i in range(0, len(sequence)-1):
         if Space_Values[sequence[1][i]]*(meter[1]/4) + measure_timer > meter[0]:
             measure_timer = Space_Values[sequence[1][i]]*(meter[1]/4)
             chords_count += 1
@@ -177,11 +167,11 @@ def insert_passing_tones(sequence, min_distance, min_duration, chords, meter):
         if check_space_for_insert(sequence[0][i], sequence[0][i+1],
                                           fuller_mode, min_distance):
             pitch = find_bridge(sequence[0][i], sequence[0][i+1], 1, fuller_mode)
-            insert = check_timing_for_insert(sequence[1][i], sequence[1][i+1], min_duration)
+            insert = check_timing_for_insert(sequence[1][i], sequence[1][1+i], min_duration)
             if insert:
                 time_insert.append(insert)
                 to_insert.append([pitch, i+1])
-
+    print("To insert:", to_insert)
     for i in range(len(to_insert)):
         sequence[0].insert(to_insert[i][1]+i, to_insert[i][0])
         sequence[1][to_insert[i][1]+i-1] = time_insert[i][0]
@@ -202,7 +192,7 @@ def is_trillable(sequence):
     return False
 
 
-def alterate_part(part):
+def alter_part(part):
     sequence = strip_part(part)
     alteration = random.choice(['retrograde', 'trills'])#, 'invert'])
     if is_trillable(sequence) and alteration == 'trills':

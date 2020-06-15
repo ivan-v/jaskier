@@ -1,8 +1,11 @@
 import random
 
 from chord_progression import convert_chord_names_to_sequence
-from rhythm import generate_rhythm_measure
+from melodic_alteration import strip_part
+from rhythm import generate_rhythm_measure, Space_Values
 from stems import choose_leading_tone
+
+from midiutil import MIDIFile
 
 Beat_Intensity_Presets = {
     "0":  {"hn": .8, "qn": .2},
@@ -111,6 +114,30 @@ chords = convert_chord_names_to_sequence(sequence)
 rhythm = generate_rhythmic_beat((3,4), 6, 2, False)
 
 g = generate_rhythmic_motion(3, 3, False)
-print(full_rhythmic_motion_to_euterpea(chords, rhythm, True, g))
-
+testy = "note qn 64 :+: note qn 72 :+: note qn 72 :+: note hn 72 :+: note qn 72 :+: note qn 71 :+: note qn 65 :+: note qn 71 :+: note hn 72 :+: note qn 67 :+: note qn 67 :+: note qn 69 :+: note qn 67 :+: note hn 60 :+: note qn 60 :+: note qn 60 :+: note qn 67 :+: note qn 67 :+: note hn 60 :+: note qn 58 :+: note qn 69 :+: note qn 73 :+: note qn 69 :+: note hn 69 :+: note qn 71 :+: note qn 69 :+: note qn 60 :+: note qn 52 :+: note hn 52 :+: note qn 55 :+: note qn 62 :+: note qn 72 :+: note qn 65 :+: note hn 57 :+: note qn 64 :+: note qn 64 :+: note qn 60 :+: note qn 57 :+: note hn 62 :+: note qn 62 :+: note qn 62 :+: note qn 67 :+: note qn 71 :+: note qn 64 :+: note qn 72 :+: note qn 72 :+: note hn 72 :+: note qn 72 :+: note qn 71 :+: note qn 65 :+: note qn 71 :+: note hn 72 :+: note qn 67 :+: note qn 67 :+: note qn 69 :+: note qn 67 :+: note hn 60 :+: note qn 60 :+: note qn 60 :+: note qn 67 :+: note qn 67 :+: note hn 60 :+: note qn 58 :+: note qn 69 :+: note qn 73 :+: note qn 69 :+: note hn 69 :+: note qn 71 :+: note qn 69 :+: note qn 60 :+: note qn 52 :+: note hn 52 :+: note qn 55 :+: note qn 62 :+: note qn 72 :+: note qn 65 :+: note hn 57 :+: note qn 64 :+: note qn 64 :+: note qn 60 :+: note qn 57 :+: note hn 62 :+: note qn 62 :+: note qn 62 :+: note qn 67 :+: note qn 71:+: note wn 64"
+rm = full_rhythmic_motion_to_euterpea(chords, rhythm, True, g)
+t = strip_part(testy)
 # print(convert_full_chords_to_euterpea(chords, rhythm, True))
+
+degrees  = [60, 62, 64, 65, 67, 69, 71, 72] # MIDI note number
+track    = 0
+channel  = 0
+time     = 0   # In beats
+duration = .5   # In beats
+tempo    = 130  # In BPM
+volume   = 100 # 0-127, as per the MIDI standard
+
+MyMIDI = MIDIFile(1) # One track, defaults to format 1 (tempo track
+                     # automatically created)
+MyMIDI.addTempo(track,time, tempo)
+
+
+
+for i in range(len(t[0])):
+    duration = Space_Values[t[1][i]]
+    MyMIDI.addNote(track, channel, t[0][i], time, duration, volume)
+    time += duration
+
+with open("major-scale.mid", "wb") as output_file:
+    MyMIDI.writeFile(output_file)
+

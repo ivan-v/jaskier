@@ -5,34 +5,32 @@ from rhythm import generate_rhythm, replace_some_quarters_with_eights
 from rhythm import merge_pitches_with_rhythm, rhythm_pdf_presets
 
 def shift_octave(part, shift):
-    sliced = part.split()
-    pitches = [i.isdigit() and int(i) > 20 for i in sliced]
-    for i in range(len(pitches)):
-      if pitches[i]:
-        sliced[i] = str(int(sliced[i])+int(12*shift))
-    return ' '.join(sliced)
+    result = part
+    for i in range(len(result)):
+        result[0][i] += 12*int(shift)
+    return result
 
+# TODO: Convert to new format
+# def generate_arpeggios(presets, parts, pattern):
+#     arpeggios = ""
+#     if presets["meter"][1] == 4:
+#         note = 'qn'
+#     else:
+#         note = 'en'
+#     if pattern == "double upwards":
+#         pitches = [sum([val for val in parts[part] for _ in (0, 1)], [])
+#                                                        for part in parts]
+#     else:
+#         pitches = [sum(parts[part], []) for part in parts]
 
-def generate_arpeggios(presets, parts, pattern):
-    arpeggios = ""
-    if presets["meter"][1] == 4:
-        note = 'qn'
-    else:
-        note = 'en'
-    if pattern == "double upwards":
-        pitches = [sum([val for val in parts[part] for _ in (0, 1)], [])
-                                                       for part in parts]
-    else:
-        pitches = [sum(parts[part], []) for part in parts]
-
-    pieces = {}
-    c = 0
-    for part in parts:
-        pieces[part] = merge_pitches_with_rhythm(pitches[c],
-                                                 [note]*len(pitches[c]))
-        c += 1
+#     pieces = {}
+#     c = 0
+#     for part in parts:
+#         pieces[part] = merge_pitches_with_rhythm(pitches[c],
+#                                                  [note]*len(pitches[c]))
+#         c += 1
     
-    return match_parts_to_form(presets["form"], pieces)
+#     return match_parts_to_form(presets["form"], pieces)
 
 
 def choose_leading_tone(origin, goal):
@@ -71,37 +69,38 @@ def provide_walking_bass(parts, meter):
         sections[part] = sum(generate_walking_bass(parts[part], meter), [])
     return sections
 
+# TODO: Convert to new form
 # we assume that different sections have the same meter
-def full_walking_bass_over_form(form, parts, meter):
-    sections = provide_walking_bass(parts, meter)
-    # \/ could use improvement
-    beat = 'qn'
-    for section in sections:
-        sections[section] = " :+: ".join(['note ' + beat + ' ' + str(note)
-                                            for note in sections[section]])
-    return match_parts_to_form(form, sections)
+# def full_walking_bass_over_form(form, parts, meter):
+#     sections = provide_walking_bass(parts, meter)
+#     # \/ could use improvement
+#     beat = 'qn'
+#     for section in sections:
+#         sections[section] = " :+: ".join(['note ' + beat + ' ' + str(note)
+#                                             for note in sections[section]])
+#     return match_parts_to_form(form, sections)
 
+# TODO: Convert to new form
+# def basic_full_bass(chords, meter, beat):
+#     bass = []
+#     for i in range(len(chords)):
+#         bass.append("(note " + beat + " " + str(chords[i][0]) + " :=: note " 
+#                     + beat + " " + str(chords[i][1]) + " :=: note " 
+#                     + beat + " " + str(chords[i][2]) + " )")
+#     return bass
 
-def basic_full_bass(chords, meter, beat):
-    bass = []
-    for i in range(len(chords)):
-        bass.append("(note " + beat + " " + str(chords[i][0]) + " :=: note " 
-                    + beat + " " + str(chords[i][1]) + " :=: note " 
-                    + beat + " " + str(chords[i][2]) + " )")
-    return bass
-
-
-def waltz_bass(chords, meter):
-    bass = []
-    if meter[0] == 3 and meter[1] == 8:
-        beat = 'en'
-    else:
-        beat = 'qn'
-    for i in range(len(chords)):
-        bass.append("note " + beat + " " + str(chords[i][0]) + (" :+: (note " 
-                    + beat + " " + str(chords[i][1]+12) + " :=: note " 
-                    + beat + " " + str(chords[i][2]+12) + " )")*2)
-    return bass
+# TODO: Convert to new form
+# def waltz_bass(chords, meter):
+#     bass = []
+#     if meter[0] == 3 and meter[1] == 8:
+#         beat = 'en'
+#     else:
+#         beat = 'qn'
+#     for i in range(len(chords)):
+#         bass.append("note " + beat + " " + str(chords[i][0]) + (" :+: (note " 
+#                     + beat + " " + str(chords[i][1]+12) + " :=: note " 
+#                     + beat + " " + str(chords[i][2]+12) + " )")*2)
+#     return bass
 
 
 def generate_full_bass(chords, meter, beat):
@@ -111,15 +110,16 @@ def generate_full_bass(chords, meter, beat):
         bass = basic_full_bass(chords, meter, beat)
     return bass
 
-def provide_full_bass(parts, meter, beat):
-    sections = {}
-    for part in parts:
-        sections[part] = " :+: ".join(generate_full_bass(parts[part], meter, beat))
-    return sections
+# TODO: Convert to new form
+# def provide_full_bass(parts, meter, beat):
+#     sections = {}
+#     for part in parts:
+#         sections[part] = " :+: ".join(generate_full_bass(parts[part], meter, beat))
+#     return sections
 
-
-def full_bass_chords_over_form(form, parts, meter):
-    beat = "(" + str(meter[0]) + " % " + str(meter[1]) + ")"
-    sections = provide_full_bass(parts, meter, beat)
-    return match_parts_to_form(form, sections)
+# TODO: Convert to new form
+# def full_bass_chords_over_form(form, parts, meter):
+#     beat = "(" + str(meter[0]) + " % " + str(meter[1]) + ")"
+#     sections = provide_full_bass(parts, meter, beat)
+#     return match_parts_to_form(form, sections)
     
