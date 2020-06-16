@@ -5,7 +5,7 @@ from melodic_alteration import strip_part
 from rhythm import generate_rhythm_measure, Space_Values
 from stems import choose_leading_tone
 
-from generate_music import write_to_midi
+# from generate_music import write_to_midi
 
 Beat_Intensity_Presets = {
     "0":  {"hn": .8, "qn": .2},
@@ -36,6 +36,7 @@ def generate_rhythmic_beat(meter, intensity, length, show_seperate_measures):
     return beat
 
 
+# returns a list of indexes for a chord
 def generate_rhythmic_motion(length, min_chord_size, repeating_pitches):
     result = []
     for i in range(length):
@@ -47,17 +48,16 @@ def generate_rhythmic_motion(length, min_chord_size, repeating_pitches):
     return result
 
 # TODO: Make more configurable in terms of where chords vs notes
-def generate_full_rhythmic_motion(sequence, rhythm, leading_tone, rhythmic_motion, chords, meter):
+def generate_full_rhythmic_motion(rhythm, leading_tone, rhythmic_motion, chords, meter):
     result = []
-    count = 0
     time_length = 0
     measure_length = meter[0]/(meter[1]/4)
     for i in range(len(chords)):
         # \/ size of measure for the chord
         measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
         for j in range(measure_size):
-            if j == measure_size-1 and count != len(sequence)-1:
-                result.append([choose_leading_tone(chords[i][0][0], sequence[count+1][0]),
+            if j == measure_size-1 and i != len(chords)-1:
+                result.append([choose_leading_tone(chords[i][0][0], chords[i+1][0][0]),
                                                                     rhythm[j], time_length])
             elif j + len(rhythmic_motion) > measure_size - leading_tone - 1:
                 pitch = chords[i][0][rhythmic_motion[measure_size - leading_tone - j - 1]]
@@ -65,7 +65,6 @@ def generate_full_rhythmic_motion(sequence, rhythm, leading_tone, rhythmic_motio
             elif j != measure_size - 1:
                 result += [[p, rhythm[j], time_length] for p in chords[i][0]]
             time_length += Space_Values[rhythm[j]]
-        count += 1
     return result
 
 
@@ -73,12 +72,12 @@ sequence = ['Am', 'G', 'Fmaj7', 'Em',
   'Dm7', 'G7', 'Cmaj7', 'Bbmaj7', 'Bm11', 'E7', 'Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7']
 
-meter = (4,4)
-chords = convert_chord_names_to_over_measures(sequence, meter)
+# meter = (4,4)
+# chords = convert_chord_names_to_over_measures(sequence, meter)
 
-rhythm = generate_rhythmic_beat(meter, 4, 2, False)
+# rhythm = generate_rhythmic_beat(meter, 4, 2, False)
 
-g = generate_rhythmic_motion(3, 3, False)
-rm = generate_full_rhythmic_motion(chords, rhythm, True, g, better_chords, meter)
+# g = generate_rhythmic_motion(3, 3, False)
+# rm = generate_full_rhythmic_motion(rhythm, True, g, chords, meter)
 # write_to_midi(rm)
 

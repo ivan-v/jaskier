@@ -2,6 +2,7 @@ import math
 
 from chord_progression import generate_full_chord_sequence, Special_Chords, convert_chord_names_to_over_measures
 from forms import Forms, pick_random_form, match_parts_to_form, match_and_alter_parts_to_form
+from hand_motions import generate_hand_motions
 from melodic_alteration import insert_passing_tones, strip_part
 from modes_and_keys import apply_key, Starting_Pitch
 from motif_generator import generate_pitches
@@ -125,13 +126,19 @@ def sort_notes_into_measures(notes, meter):
     return measures
 
 
-def generate_song_from_chords(presets, given_chords):
+def generate_song_from_chords(presets, given_chords, *make_hand_motions):
     chords = convert_chord_names_to_over_measures(given_chords, presets["meter"])
     parts = {"A": chords}
     pieces = generate_melody_pieces(presets, parts)
-    song = match_and_alter_parts_to_form(Forms["One-part"], pieces)        
+    song = match_and_alter_parts_to_form(Forms["One-part"], pieces)
+    melody = sync_note_durations(song)
+    if make_hand_motions:
+        hand_motions = generate_hand_motions(parts, presets["meter"])
+        hands = match_parts_to_form(Forms["One-part"], hand_motions)
+        return melody + hands
+    else:
+        return melody
     # TODO: Add whole note at the end, maybe?
-    return song
 
 
 # For now, "song" format assumes [note1, note2, note3, ...]
@@ -139,12 +146,12 @@ def write_to_midi(song):
     track    = 0
     channel  = 0
     time     = 0   # In beats
-    tempo    = 130  # In BPM
+    tempo    = 130 # In BPM
     volume   = 100 # 0-127, as per the MIDI standard
 
     MyMIDI = MIDIFile(1) # One track, defaults to format 1 (tempo track
                          # automatically created)
-    MyMIDI.addTempo(track,time, tempo)
+    MyMIDI.addTempo(track, time, tempo)
 
     for i in range(len(song)):
         MyMIDI.addNote(track, channel, song[i][0], song[i][2], Space_Values[song[i][1]], volume)
@@ -178,6 +185,6 @@ def handle_input(command):
 chords = ['Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7', 'Bbmaj7', 'Bm11', 'E7', 'Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7']
-p = generate_song_from_chords(Presets, chords)
-write_to_midi(sync_note_durations(p))
+p = generate_song_from_chords(Presets, chords, True)
+write_to_midi(p)
 

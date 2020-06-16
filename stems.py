@@ -7,7 +7,7 @@ from rhythm import merge_pitches_with_rhythm, rhythm_pdf_presets
 def shift_octave(part, shift):
     result = part
     for i in range(len(result)):
-        result[0][i] += 12*int(shift)
+        result[i][0] += 12*int(shift)
     return result
 
 # TODO: Convert to new format

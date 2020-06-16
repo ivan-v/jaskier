@@ -25,7 +25,7 @@ def pick_random_form():
 def match_parts_to_form(form, parts):
     result = []
     for i in range(len(form)):
-        result += part[form[i]]
+        result += parts[form[i]]
     return result
 
 
