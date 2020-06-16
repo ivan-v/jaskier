@@ -1,7 +1,7 @@
 import random
 
 from chord_progression import available_pitches_in_chords
-from rhythm import generate_rhythm, replace_some_quarters_with_eights, merge_pitches_with_rhythm, rhythm_pdf_presets
+from rhythm import generate_rhythm, replace_some_quarters_with_eights, merge_pitches_with_rhythm, rhythm_pdf_presets, Space_Values
 # from modes_and_keys import apply_key
 
 
@@ -48,17 +48,27 @@ def select_and_verify_motion(chords, rhythm, pitches, span,
         new_tones = [fuller_mode[current_place_in_mode+x] for x in motion]
         out_of_range = span/2 < abs(new_tones[-1] - base)
     motion = previous_motion
-    # Problem: we may cut our chords_and_rhythm unneccessarily when our motion
-    # gets rejected later. -- ^what?
     
     pitches += new_tones
 
     return pitches
 
 def generate_pitches(length, base, span, chords, rhythm):
-    av = [sum(chord, []) for chord in available_pitches_in_chords(chords)]
-    ap = sum([[av[i] for note in rhythm[i]] for i in range(len(rhythm))], [])
-    
+    chords_without_duration = [chord[0] for chord in chords]
+    av = [sum(chord, []) for chord
+          in available_pitches_in_chords(chords_without_duration)]
+    av_with_duration = {}
+    for i in range(len(av)):
+        av_with_duration[chords[i][1][0]] = av[i]
+    durations = list(av_with_duration.keys())
+    ap = []
+    time_length = 0
+    current_place = 0
+    for i in range(len(rhythm)):
+        for j in range(len(rhythm[i])):
+            closest = max([i for i in durations if i <= time_length])
+            ap.append(av_with_duration[closest])
+            time_length += Space_Values[rhythm[i][j]]    
     pitches = [base]
     previous_motion = []
     previous_motion = []

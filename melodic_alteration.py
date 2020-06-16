@@ -33,8 +33,6 @@ def infer_key(pitches):
         probabilities[key[0]] = score
     return max(probabilities, key=probabilities.get)
 
-# print(strip_part(test_pieces['A'])[0])
-# print(infer_key(strip_part(testy)[0]))
 
 def find_bridge(start, goal, length, fuller_mode):
     if goal not in fuller_mode:
@@ -148,7 +146,6 @@ def check_timing_for_insert(first_note, second_note, min_duration):
             return list(map(lambda x: lookup_in_space_values(x),
                                                b2[c.index(min(c))]))
 
-
 def insert_passing_tones(sequence, min_distance, min_duration, chords, meter):
     to_insert   = []
     time_insert = []
@@ -163,7 +160,7 @@ def insert_passing_tones(sequence, min_distance, min_duration, chords, meter):
         else:
             measure_timer += Space_Values[sequence[1][i]]*(meter[1]/4)
             cach.append(sequence[1][i])
-        fuller_mode = sum(available_pitches_in_full_chord(chords[chords_count]), [])
+        fuller_mode = sum(available_pitches_in_full_chord(chords[chords_count][0]), [])
         if check_space_for_insert(sequence[0][i], sequence[0][i+1],
                                           fuller_mode, min_distance):
             pitch = find_bridge(sequence[0][i], sequence[0][i+1], 1, fuller_mode)
@@ -171,7 +168,7 @@ def insert_passing_tones(sequence, min_distance, min_duration, chords, meter):
             if insert:
                 time_insert.append(insert)
                 to_insert.append([pitch, i+1])
-    print("To insert:", to_insert)
+    # print("To insert:", to_insert)
     for i in range(len(to_insert)):
         sequence[0].insert(to_insert[i][1]+i, to_insert[i][0])
         sequence[1][to_insert[i][1]+i-1] = time_insert[i][0]
@@ -180,7 +177,6 @@ def insert_passing_tones(sequence, min_distance, min_duration, chords, meter):
 
     return sequence
 
-# insert_passing_tones(strip_part(test_pieces['A']), 2, .5)
 
 def is_rhythm_constant(sequence):
     return sequence[1][1:] == sequence[1][:-1]

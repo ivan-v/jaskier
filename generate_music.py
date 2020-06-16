@@ -1,6 +1,6 @@
 import math
 
-from chord_progression import convert_chord_names_to_sequence, generate_full_chord_sequence, Special_Chords
+from chord_progression import generate_full_chord_sequence, Special_Chords, convert_chord_names_to_over_measures
 from forms import Forms, pick_random_form, match_parts_to_form, match_and_alter_parts_to_form
 from melodic_alteration import insert_passing_tones, strip_part
 from modes_and_keys import apply_key, Starting_Pitch
@@ -57,8 +57,6 @@ def generate_melody_pieces(presets, parts):
                 rhythm.pop()
 
         # TODO: Better selection of # of repetitions for rhythm per melody
-        # TODO: FIX problem \/
-        #  Warning!: does 1 chord per measure
         melody_length = len(sum(rhythm, []))
         melody = generate_pitches(melody_length, base, 18, chords, rhythm)
         while len(melody) > len(sum(rhythm,[])):
@@ -70,7 +68,7 @@ def generate_melody_pieces(presets, parts):
             if i < presets["repetitions_in_part"]-1:
                 melody += melody
                 chords += chords
-        with_passing_tones = insert_passing_tones(strip_part(melody), 2, .5, chords, presets["meter"])
+        with_passing_tones = insert_passing_tones(strip_part(melody), 1, .5, chords, presets["meter"])
         pieces[part] = merge_pitches_with_rhythm(with_passing_tones[0], with_passing_tones[1])
 
     return pieces
@@ -100,16 +98,35 @@ def generate_melody_pieces(presets, parts):
 #     print('> song :: Music AbsPitch')
 #     print("> song = ", shift_octave(song, 0))
 #     return song
-def sync_note_durations(song):
+
+# Assumes no overlap
+def sync_note_durations(notes):
     time_length = 0
-    for i in range(len(song)):
-        song[i][2] = time_length
-        time_length += Space_Values[song[i][1]]
-    return song
+    for i in range(len(notes)):
+        notes[i][2] = time_length
+        time_length += Space_Values[notes[i][1]]
+    return notes
+
+
+def sort_notes_into_measures(notes, meter):
+    measure_count = 0
+    beats_count = 0
+    measure = []
+    measures = []
+    for note in notes:
+        if beats_count + Space_Values[note[1]] > meter[0]/(meter[1]/4):
+            beats_count = Space_Values[note[1]]
+            measure_count += 1
+            measures.append(measure)
+            measure = [note]
+        else:
+            beats_count += Space_Values[note[1]]
+            measure.append(note)
+    return measures
 
 
 def generate_song_from_chords(presets, given_chords):
-    chords = convert_chord_names_to_sequence(given_chords)
+    chords = convert_chord_names_to_over_measures(given_chords, presets["meter"])
     parts = {"A": chords}
     pieces = generate_melody_pieces(presets, parts)
     song = match_and_alter_parts_to_form(Forms["One-part"], pieces)        

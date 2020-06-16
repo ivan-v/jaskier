@@ -35,7 +35,7 @@ Special_Chords = {
   "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
 }
 
-# Needs a fair bit of work 
+# TODO: Needs a fair bit of work 
 # def make_full_chord_progression(applied_key, *input_tonics):
 #   result = []
 #   m = applied_key[1][0]
@@ -206,6 +206,39 @@ def convert_roman_chord_names_to_sequence(mode, given_chords):
 def convert_chord_names_to_sequence(given_chords):
   return [construct_chord_from_name(chord) for chord in given_chords]
 
+
+# assumes chords format of [[pitches], num_measures]
+def chords_over_measures(chords, meter, *starting_time):
+  result = []
+  measure_length = meter[0]/(meter[1]/4)
+  if starting_time:
+    t1 = starting_time
+  else:
+    t1 = 0
+  for chord in chords:
+    t2 = t1 + chord[1]*measure_length
+    result.append((chord[0], (t1, t2)))
+    t1 = t2
+  return result
+
+def convert_chord_names_to_over_measures(given_chords, meter,
+                                         *measures_per_chord_default):
+  if measures_per_chord_default:
+    default = measures_per_chord_default
+  else:
+    # default length of 1 measure per chord
+    default = 1
+  chords_with_lengths = []
+  for entry in given_chords:
+    if type(entry) == list:
+      chords_with_lengths.append(entry)
+    else:
+      chords_with_lengths.append([entry, default])
+  just_chords = [chord[0] for chord in chords_with_lengths]
+  chords_with_pitches = convert_chord_names_to_sequence(just_chords)
+  fuller_chords = [[chords_with_pitches[i], chords_with_lengths[i][1]]
+                                     for i in range(len(given_chords))]
+  return chords_over_measures(fuller_chords, meter)
 
 # not currently used
 def sway_tonics(tonics, step_tendency):

@@ -2,7 +2,6 @@ import random
 
 Space_Values = {"hn": 2, "qn": 1, "en": .5, "(3 % 8)": 1.5, "(1 % 3)": 1.0/3.0}
 
-
 # should add up to 1
 rhythm_pdf_presets = {
     "default": {"hn": .33, "qn": .66, "en": .01},
@@ -52,7 +51,6 @@ def replace_some_quarters_with_eights(rhythm, frequency):
             new_rhythm[i] = "en"
             new_rhythm.insert(i, 'en')
     return new_rhythm
-
 
 
 # Doesn't work with whacky meters (anything other than a base-4 in the denominator)
