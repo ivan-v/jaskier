@@ -55,16 +55,23 @@ def generate_full_rhythmic_motion(rhythm, leading_tone, rhythmic_motion, chords,
     for i in range(len(chords)):
         # \/ size of measure for the chord
         measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
+        current_rhythm = rhythm
+        # potential warning: is funky with small fractions, like .23 of a measure
+        while measure_size > len(current_rhythm):
+            if len(current_rhythm) + len(rhythm) <= measure_size: 
+                current_rhythm = rhythm[0:len(rhythm)]
+            else:
+                current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
         for j in range(measure_size):
             if j == measure_size-1 and i != len(chords)-1:
                 result.append([choose_leading_tone(chords[i][0][0], chords[i+1][0][0]),
-                                                                    rhythm[j], time_length])
+                                                        current_rhythm[j], time_length])
             elif j + len(rhythmic_motion) > measure_size - leading_tone - 1:
                 pitch = chords[i][0][rhythmic_motion[measure_size - leading_tone - j - 1]]
-                result.append([pitch, rhythm[j], time_length])
+                result.append([pitch, current_rhythm[j], time_length])
             elif j != measure_size - 1:
-                result += [[p, rhythm[j], time_length] for p in chords[i][0]]
-            time_length += Space_Values[rhythm[j]]
+                result += [[p, current_rhythm[j], time_length] for p in chords[i][0]]
+            time_length += Space_Values[current_rhythm[j]]
     return result
 
 

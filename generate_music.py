@@ -40,7 +40,7 @@ def generate_parts_and_chords(presets, applied_key):
     return parts
 
 
-def generate_melody_pieces(presets, parts):
+def generate_melody_pieces(presets, parts, given_chords):
     pieces = {}
     for part in parts:
         chords = parts[part]
@@ -53,9 +53,23 @@ def generate_melody_pieces(presets, parts):
         rhythm = repeat_section(rhythmic_backbone,
                                 math.ceil(len(chords)/len(rhythmic_backbone)))
         
-        if len(chords)-len(rhythm) < 0:
-            while len(rhythm) != len(chords):
+        length = 0
+        for i in range(len(given_chords)):
+            if type(given_chords[i]) == list:
+                length += given_chords[i][1]
+            else:
+                length += 1
+
+        while length > len(rhythm):
+            rhythm += rhythmic_backbone
+
+        # TODO: improve (currently pops .5 of the rhythm-measure at a time)
+        rhythm_len = len(rhythm)
+        while rhythm_len > length:
+            if rhythm[-1] == []:
                 rhythm.pop()
+            rhythm[-1] = rhythm[-1][0:int(len(rhythm[-1])/2)]
+            rhythm_len -= .5
 
         # TODO: Better selection of # of repetitions for rhythm per melody
         melody_length = len(sum(rhythm, []))
@@ -129,7 +143,7 @@ def sort_notes_into_measures(notes, meter):
 def generate_song_from_chords(presets, given_chords, *make_hand_motions):
     chords = convert_chord_names_to_over_measures(given_chords, presets["meter"])
     parts = {"A": chords}
-    pieces = generate_melody_pieces(presets, parts)
+    pieces = generate_melody_pieces(presets, parts, given_chords)
     song = match_and_alter_parts_to_form(Forms["One-part"], pieces)
     melody = sync_note_durations(song)
     if make_hand_motions:

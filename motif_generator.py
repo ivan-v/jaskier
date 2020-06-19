@@ -48,7 +48,6 @@ def select_and_verify_motion(chords, rhythm, pitches, span,
         new_tones = [fuller_mode[current_place_in_mode+x] for x in motion]
         out_of_range = span/2 < abs(new_tones[-1] - base)
     motion = previous_motion
-    
     pitches += new_tones
 
     return pitches
