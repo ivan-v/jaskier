@@ -2,7 +2,7 @@ import random
 
 from rhythm import Space_Values
 from rhythm_track import generate_rhythmic_beat, generate_rhythmic_motion
-from stems import shift_octave
+from stems import choose_leading_tone, shift_octave
 
 
 def min_chord_size(chords):
@@ -11,7 +11,7 @@ def min_chord_size(chords):
 
 def octave_doubling(chords, meter, rhythm):
     min_chord_length = min_chord_size(chords)
-    degree = generate_rhythmic_motion(min_chord_length, 3, True)[0]
+    degree = generate_rhythmic_motion(min_chord_length, min_chord_length, True)[0]
     measure_length = meter[0]/(meter[1]/4)
     notes = []
     time_length = 0
@@ -31,10 +31,9 @@ def octave_doubling(chords, meter, rhythm):
             time_length += Space_Values[current_rhythm[j]]
     return notes
 
-# TODO: Write a function to find the minimum chord length of a sequence
 def seesaw(chords, meter, rhythm):
     min_chord_length = min_chord_size(chords)
-    degrees = generate_rhythmic_motion(min_chord_length, 10, False)
+    degrees = generate_rhythmic_motion(min_chord_length, min_chord_length, False)
     for i in range(min_chord_length-1):
         if degrees[i] > degrees[i+1]:
             degrees[i+1] += 12
@@ -69,20 +68,122 @@ def seesaw(chords, meter, rhythm):
             time_length += Space_Values[current_rhythm[j]]
     return notes
 
-def arpeggios(chords):
-    return
+def arpeggios(chords, meter, rhythm):
+    min_chord_length = min_chord_size(chords)
+    # whether the first beat is lower than the second 
+    direction = random.choice([list(range(0, min_chord_length)),
+                               list(range(min_chord_length, 0, -1))])
+    measure_length = meter[0]/(meter[1]/4)
+    notes = []
+    time_length = 0
+    for i in range(len(chords)):
+        # \/ size of measure for the chord
+        measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
+        current_rhythm = rhythm[0:len(rhythm)]
+        # potential warning: is funky with small fractions, like .23 of a measure
+        while measure_size > len(current_rhythm):
+            if len(current_rhythm) + len(rhythm) <= measure_size: 
+                current_rhythm += rhythm
+            else:
+                current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
+        for j in range(measure_size):
+            for k in range(len(direction)):
+                if j % len(direction) == k:
+                    notes.append([chords[i][0][k], current_rhythm[j], time_length])
+            time_length += Space_Values[current_rhythm[j]]
+    return notes
 
-def full_chord(chords, rhythm):
-    return
+def full_chord(chords, meter, rhythm, *guitar_strum):
+    measure_length = meter[0]/(meter[1]/4)
+    notes = []
+    time_length = 0
+    for i in range(len(chords)):
+        # \/ size of measure for the chord
+        measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
+        current_rhythm = rhythm[0:len(rhythm)]
+        # potential warning: is funky with small fractions, like .23 of a measure
+        while measure_size > len(current_rhythm):
+            if len(current_rhythm) + len(rhythm) <= measure_size: 
+                current_rhythm += rhythm
+            else:
+                current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
+        for j in range(measure_size):
+            strum_offset = 0
+            for pitch in chords[i][0]:
+                if guitar_strum:
+                    notes.append([pitch, current_rhythm[j], time_length+strum_offset])
+                else:
+                    notes.append([pitch, current_rhythm[j], time_length])
+                strum_offset += .05
+            time_length += Space_Values[current_rhythm[j]]
+    return notes
+
+# TODO: Needs good polish
+def walking_bass(chords, meter):
+    measure_length = meter[0]/(meter[1]/4)
+    notes = []
+    time_length = 0
+    if meter[0] % 3 == 0:
+        if meter[1] == 4:
+            rhythm = ['qn', 'qn', 'qn']
+        else:
+            rhythm = ['en', 'en', 'en']
+    else:
+        if meter[1] == 4:
+            rhythm = ['qn', 'qn', 'qn', 'qn']
+        else:
+            rhythm = ['en', 'en', 'en', 'en']
+    for i in range(len(chords)):
+        # \/ size of measure for the chord
+        measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
+        current_rhythm = rhythm[0:len(rhythm)]
+        # potential warning: is funky with small fractions, like .23 of a measure
+        while measure_size > len(current_rhythm):
+            if len(current_rhythm) + len(rhythm) <= measure_size: 
+                current_rhythm += rhythm
+            else:
+                current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
+        measure = []
+        for j in range(measure_size):
+            if j == 0:
+                measure.append([chords[i][0][0], current_rhythm[j], time_length])
+            elif meter[0] > 2 and j == 1:
+                measure.append([random.choice(chords[i][0][1:]), current_rhythm[j],
+                                                                       time_length])
+            elif i < len(chords)-1 and j == measure_size-1:
+                measure.append([choose_leading_tone(measure[-1][0], chords[i+1][0][0]),
+                                                   current_rhythm[j], time_length])
+            elif meter[0] % 4 == 0 and j > 1:
+                possibility = random.choice([i for i in chords[i][0]
+                                              if i not in measure])
+                measure.append([random.choice([i for i in chords[i][0]
+                                              if i not in measure]),
+                                        current_rhythm[j], time_length])
+            else:
+                measure.append([chords[i][0][0], current_rhythm[j], time_length])
+            time_length += Space_Values[current_rhythm[j]]
+        notes += measure
+    return notes
+
 
 def running_scale(pitches):
     return
 
 def pick_hand_motion(chords, meter, rhythm):
-    motion = random.randint(0,1)
-    return seesaw(chords, meter, rhythm)
+    motion = random.randint(0,4) 
+    # return full_chord(chords, me ter, rhythm)
+    # return walking_bass(chords, meter)
+    # return arpeggios(chords, meter, rhythm)
+    # return seesaw(chords, meter, rhythm)
+    # return octave_doubling(chords, meter, rhythm)
     if motion == 0:
         return seesaw(chords, meter, rhythm)
+    elif motion == 1:
+        return full_chord(chords, meter, rhythm)
+    elif motion == 2:
+        return arpeggios(chords, meter, rhythm)
+    elif motion == 3:
+        return walking_bass(chords, meter)
     else:
         return octave_doubling(chords, meter, rhythm)
 
@@ -96,6 +197,7 @@ def generate_rhythm_from_meter(meter, **kargs):
         rhythm_length = kargs["rhythm_len"]
     else:
         rhythm_length = 1 # random.choice(1,2)
+    # TODO: Adjust intensity of rhythm accordingly, but maybe in a better place?
     return generate_rhythmic_beat(meter, intensity, rhythm_length, False)
 
 def generate_hand_motion(chords, meter, **args):
