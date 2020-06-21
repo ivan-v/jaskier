@@ -1,6 +1,7 @@
 import random
 
 from melodic_alteration import alter_part
+from rhythm import Space_Values
 
 Forms = {
     "One-part": ["A"],
@@ -22,28 +23,47 @@ def pick_random_form():
     return (name, Forms[name])
 
 
+# Matching parts also syncs the notes correctly
+
 def match_parts_to_form(form, parts):
     result = []
+    time_length = 0
     for i in range(len(form)):
-        result += parts[form[i]]
+        for j in range(max([note[2] for note in parts[form[i]]])):
+            notes = [note for note in parts[form[i]] if note[2] == j]
+            if notes != []:
+                [result.append([note[0], note[1], time_length]) for note in notes]
+                time_length += Space_Values[notes[0][1]]
     return result
 
-
+# TODO: Needs fix/update
 def match_and_alter_parts_to_form(form, parts):
     result = []
-    introduced = []
-    alterated = []
+    # introduced = []
+    # alterated = []
+    time_length = 0
     for i in range(len(form)):
-        if parts[form[i]] not in introduced:
-            introduced += [parts[form[i]]]
-            result += parts[form[i]]
-        elif i == len(form)-1:
-            result += parts[form[i]]
-        else:
-            option = alter_part(parts[form[i]])
-            while option in alterated:    
-                option = alter_part(parts[form[i]])
-            alterated += [option]
-            result += option
+        done_notes = set()
+        for note in parts[form[i]]:
+            for some_note in parts[form[i]]:
+                if some_note is note and str(some_note) not in done_notes:
+                    result.append([note[0], note[1], time_length])
+                    done_notes.add(str(note))
+                elif some_note[2] == note[2] \
+                    and some_note is not note \
+                    and str(some_note) not in done_notes:
+                    result.append([note[0], note[1], time_length])
+            time_length += Space_Values[note[1]]
+    #     if parts[form[i]] not in introduced:
+    #         introduced += [parts[form[i]]]
+    #         result += parts[form[i]]
+    #     elif i == len(form)-1:
+    #         result += parts[form[i]]
+    #     else:
+    #         option = alter_part(parts[form[i]])
+    #         while option in alterated:    
+    #             option = alter_part(parts[form[i]])
+    #         alterated += [option]
+    #         result += option
     return result
 

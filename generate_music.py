@@ -9,6 +9,7 @@ from motif_generator import generate_pitches
 from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets, replace_some_quarters_with_eights, Space_Values
 from stems import shift_octave#, generate_arpeggios, full_walking_bass_over_form, full_bass_chords_over_form
 
+from hand_motions import full_chord
 
 from midiutil import MIDIFile
 
@@ -54,8 +55,9 @@ def generate_melody_pieces(presets, parts, given_chords):
                                 math.ceil(len(chords)/len(rhythmic_backbone)))
         
         length = 0
-        for i in range(len(given_chords)):
-            if type(given_chords[i]) == list:
+        for i in range(len(chords)):
+            if type(given_chords[i]) == list and \
+               type(given_chords[i][0]) == str:
                 length += given_chords[i][1]
             else:
                 length += 1
@@ -71,6 +73,7 @@ def generate_melody_pieces(presets, parts, given_chords):
             rhythm[-1] = rhythm[-1][0:int(len(rhythm[-1])/2)]
             rhythm_len -= .5
 
+        chords = reset_chord_times(chords, presets["meter"])
         # TODO: Better selection of # of repetitions for rhythm per melody
         melody_length = len(sum(rhythm, []))
         melody = generate_pitches(melody_length, base, 18, chords, rhythm)
@@ -79,40 +82,57 @@ def generate_melody_pieces(presets, parts, given_chords):
 
         bit = merge_pitches_with_rhythm(melody, sum(rhythm,[]))
         melody = bit
-        for i in range(presets["repetitions_in_part"]):
-            if i < presets["repetitions_in_part"]-1:
-                melody += melody
-                chords += chords
-        with_passing_tones = insert_passing_tones(strip_part(melody), 1, .5, chords, presets["meter"])
-        pieces[part] = merge_pitches_with_rhythm(with_passing_tones[0], with_passing_tones[1])
-
+        # Repetition is separate issue
+        # for i in range(presets["repetitions_in_part"]):
+        #     if i < presets["repetitions_in_part"]-1:
+        #         melody += melody
+        #         chords += chords
+        # with_passing_tones = insert_passing_tones(strip_part(melody), 1, .5, chords, presets["meter"])
+        # pieces[part] = merge_pitches_with_rhythm(with_passing_tones[0], with_passing_tones[1])
+        pieces[part] = melody
     return pieces
 
+def compute_chord_times(parts, form, meter):
+    result = []
+    time_length = 0
+    for part in parts:
+        for i in range(len(parts[part])):
+            # TODO: fix assumption that each chord is one measure long
+            parts[part][i] = (parts[part][i], (time_length, 
+                              time_length + meter[0]/(meter[1]/4)))
+            result.append((parts[part][i], (time_length, 
+                           time_length + meter[0]/(meter[1]/4))))
+            time_length += meter[0]/(meter[1]/4)
+    return result
+
+def reset_chord_times(chords, meter):
+    time_length = 0
+    result = []
+    for chord in chords:
+        result.append((chord[0], (time_length,
+                       time_length + meter[0]/(meter[1]/4))))
+        time_length += meter[0]/(meter[1]/4)
+    return result
+
+
 # TODO: Major rework and update to new form
-# def generate_song_and_chords(presets):
+def generate_song_and_chords(presets):
     
-#     applied_key = apply_key(presets["key"], presets["base"])
-#     parts = generate_parts_and_chords(presets, applied_key)
+    applied_key = apply_key(presets["key"], presets["base"])
+    parts = generate_parts_and_chords(presets, applied_key)
 
-#     arpeggios = generate_arpeggios(presets, parts, "double upwards")
-#     # print("Arpeggios:", arpeggios)
-
+    chords = compute_chord_times(parts, presets["form"], presets["meter"])
+    pieces = generate_melody_pieces(presets, parts, chords)
+    # print(parts)
+    # print([parts[bit][0] for bit in parts])
+    full_chords = {}
+    for part in parts:
+        full_chords[part] = full_chord(parts[part], presets["meter"], ['hn', 'hn'])
     
-#     # bass = full_walking_bass_over_form(presets["form"], parts, presets["meter"])
-#     # print("Walking Bass:", shift_octave(bass, -1))
-#     full_bass = full_bass_chords_over_form(presets["form"], parts, presets["meter"])
-#     print("\n")
-#     print('> bass :: Music AbsPitch')
-#     print("> bass = ", shift_octave(full_bass, -2))
+    more_chords = shift_octave(match_parts_to_form(presets["form"], full_chords), -2)
+    song = match_parts_to_form(presets["form"], pieces)
 
-#     pieces = generate_melody_pieces(presets, parts)
-#     # print(pieces)
-
-#     song = match_and_alter_parts_to_form(presets["form"], pieces)        
-#     song += ":+: note wn " + str(Starting_Pitch[presets["base"]]) 
-#     print('> song :: Music AbsPitch')
-#     print("> song = ", shift_octave(song, 0))
-#     return song
+    return song + more_chords
 
 # Assumes no overlap
 def sync_note_durations(notes):
@@ -199,6 +219,7 @@ def handle_input(command):
 chords = ['Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7', 'Bbmaj7', 'Bm11', 'E7', 'Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7']
-p = generate_song_from_chords(Presets, chords, True)
+p = generate_song_and_chords(Presets)
+# p = generate_song_from_chords(Presets, chords, True)
 write_to_midi(p)
 

@@ -36,21 +36,24 @@ Special_Chords = {
 }
 
 # TODO: Needs a fair bit of work 
-# def make_full_chord_progression(applied_key, *input_tonics):
-#   result = []
-#   m = applied_key[1][0]
-#   m += [i+12 for i in m]
-#   m += [i+36 for i in m]
-#   m.sort()
-#   if input_tonics:
-#     tonics = input_tonics[0]
-#   else:
-#     tonics = generate_chord_progression()
-#   if m == "Aeolian" or m == "aeolian":
-#     chords = [[0,3,7],[0,3,6],[0,4,7],[0,3,7],[0,4,7],[0,4,7],[0,3,6]]
-#   selected_chords = [[0, m[tonic+2]-m[tonic], m[tonic+4]-m[tonic]] for tonic in tonics]
-#   return [[note + applied_key[1][0][i] + applied_key[1][1]
-#            for note in selected_chords[i]] for i in range(len(selected_chords))]
+def make_full_chord_progression(applied_key, *input_tonics):
+  result = []
+  m = applied_key[1][0]
+  m += [i+12 for i in m]
+  m += [i+36 for i in m]
+  m.sort()
+  m = list(set(m))
+  if input_tonics:
+    tonics = input_tonics[0]
+  else:
+    tonics = generate_chord_progression()
+  chords = [[0,4,7],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,3,7],[0,3,6]]
+  selected_chords = [[0, m[tonic+2]-m[tonic], m[tonic+4]-m[tonic]] for tonic in tonics]
+  return [[note + applied_key[1][0][i] + applied_key[1][1]
+           for note in selected_chords[i]] for i in range(len(selected_chords))]
+
+a= make_full_chord_progression(apply_key("Ionian", "C"), [0,1,2,3,4,5,6])
+
 
 def make_chord_progression(chord_names):
   for name in chord_names:

@@ -81,8 +81,7 @@ sequence = ['Am', 'G', 'Fmaj7', 'Em',
 
 # meter = (4,4)
 # chords = convert_chord_names_to_over_measures(sequence, meter)
-
-# rhythm = generate_rhythmic_beat(meter, 4, 2, False)
+# rhythm = generate_rhythmic_beat(meter, 5, 2, False)
 
 # g = generate_rhythmic_motion(3, 3, False)
 # rm = generate_full_rhythmic_motion(rhythm, True, g, chords, meter)
