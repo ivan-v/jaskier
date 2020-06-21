@@ -94,9 +94,10 @@ def generate_pitches(length, base, span, chords, rhythm):
                     out_of_range = True
                 else:
                     new_tones.append(available[m + available.index(prev)])
-
-            out_of_range = span/2 < abs(new_tones[-1] - base)
-
+            if new_tones != []:
+                out_of_range = span/2 < abs(new_tones[-1] - base)
+            else:
+                out_of_range = False
         previous_motion = motion
         pitches += new_tones
 

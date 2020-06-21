@@ -53,7 +53,7 @@ def make_full_chord_progression(applied_key, *input_tonics):
            for note in selected_chords[i]] for i in range(len(selected_chords))]
 
 a= make_full_chord_progression(apply_key("Ionian", "C"), [0,1,2,3,4,5,6])
-
+# print(a)
 
 def make_chord_progression(chord_names):
   for name in chord_names:
@@ -260,4 +260,31 @@ def sway_tonics(tonics, step_tendency):
     else:
       pass
   return tonics
+
+
+def invert_chord(chord):
+    chord_pitches = chord[0]
+    chord_pitches[0] += 12
+    chord_pitches.sort()
+    return (chord_pitches, chord[1])
+
+
+def invert_chords_in_progression(chords):
+    result = []
+    result.append(chords[0])
+    for i in range(len(chords)-1):
+        min_chord_size = min([len(i[0]) for i in [chords[i], chords[i+1]]])
+        pitch_differences = [chords[i+1][0][k] - chords[i][0][k] % 12
+                                for k in range(min([len(j[0])
+                                    for j in [chords[i],chords[i+1]]]))]
+        new_chord = chords[i+1]
+        while len(set(pitch_differences)) < min_chord_size-1:
+            new_chord = invert_chord(new_chord)
+            pitch_differences = [(new_chord[0][k] - chords[i][0][k]) % 12
+                                    for k in range(min([len(j[0])
+                                        for j in [chords[i], new_chord]]))]
+        result.append(new_chord)
+    return result
+
+
 

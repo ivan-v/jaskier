@@ -1,6 +1,6 @@
 import math
 
-from chord_progression import generate_full_chord_sequence, Special_Chords, convert_chord_names_to_over_measures
+from chord_progression import generate_full_chord_sequence, Special_Chords, convert_chord_names_to_over_measures, invert_chords_in_progression
 from forms import Forms, pick_random_form, match_parts_to_form, match_and_alter_parts_to_form
 from hand_motions import generate_hand_motions
 from melodic_alteration import insert_passing_tones, strip_part
@@ -100,7 +100,7 @@ def compute_chord_times(parts, form, meter):
             # TODO: fix assumption that each chord is one measure long
             parts[part][i] = (parts[part][i], (time_length, 
                               time_length + meter[0]/(meter[1]/4)))
-            result.append((parts[part][i], (time_length, 
+            result.append((parts[part][i][0], (time_length, 
                            time_length + meter[0]/(meter[1]/4))))
             time_length += meter[0]/(meter[1]/4)
     return result
@@ -115,16 +115,15 @@ def reset_chord_times(chords, meter):
     return result
 
 
-# TODO: Major rework and update to new form
 def generate_song_and_chords(presets):
     
     applied_key = apply_key(presets["key"], presets["base"])
     parts = generate_parts_and_chords(presets, applied_key)
 
     chords = compute_chord_times(parts, presets["form"], presets["meter"])
+    chords = invert_chords_in_progression(chords)
     pieces = generate_melody_pieces(presets, parts, chords)
-    # print(parts)
-    # print([parts[bit][0] for bit in parts])
+
     full_chords = {}
     for part in parts:
         full_chords[part] = full_chord(parts[part], presets["meter"], ['hn', 'hn'])
@@ -162,6 +161,7 @@ def sort_notes_into_measures(notes, meter):
 
 def generate_song_from_chords(presets, given_chords, *make_hand_motions):
     chords = convert_chord_names_to_over_measures(given_chords, presets["meter"])
+    chords = invert_chords_in_progression(chords)
     parts = {"A": chords}
     pieces = generate_melody_pieces(presets, parts, given_chords)
     song = match_and_alter_parts_to_form(Forms["One-part"], pieces)

@@ -29,8 +29,14 @@ def match_parts_to_form(form, parts):
     result = []
     time_length = 0
     for i in range(len(form)):
-        for j in range(max([note[2] for note in parts[form[i]]])):
+        last_note = max([note[2] for note in parts[form[i]]])
+        for j in range(int(last_note)):
             notes = [note for note in parts[form[i]] if note[2] == j]
+            if notes != []:
+                [result.append([note[0], note[1], time_length]) for note in notes]
+                time_length += Space_Values[notes[0][1]]
+            if j == int(last_note):
+                notes = [note for note in parts[form[i]] if note[2] == last_note]
             if notes != []:
                 [result.append([note[0], note[1], time_length]) for note in notes]
                 time_length += Space_Values[notes[0][1]]
