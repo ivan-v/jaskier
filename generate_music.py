@@ -9,14 +9,12 @@ from motif_generator import generate_pitches
 from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets, replace_some_quarters_with_eights, Space_Values
 from stems import shift_octave#, generate_arpeggios, full_walking_bass_over_form, full_bass_chords_over_form
 
-from hand_motions import full_chord
-
 from midiutil import MIDIFile
 
 Presets = {
     "meter"      : (4,4),
     "key"        : "Ionian",
-    "base"       : "E",
+    "base"       : "C",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "form"       : Forms["Ballade"],
     "rhythm_length" : 2,
@@ -115,7 +113,7 @@ def reset_chord_times(chords, meter):
     return result
 
 
-def generate_song_and_chords(presets):
+def generate_song_and_chords(presets, *make_hand_motions):
     
     applied_key = apply_key(presets["key"], presets["base"])
     parts = generate_parts_and_chords(presets, applied_key)
@@ -123,15 +121,13 @@ def generate_song_and_chords(presets):
     chords = compute_chord_times(parts, presets["form"], presets["meter"])
     chords = invert_chords_in_progression(chords)
     pieces = generate_melody_pieces(presets, parts, chords)
-
-    full_chords = {}
-    for part in parts:
-        full_chords[part] = full_chord(parts[part], presets["meter"], ['hn', 'hn'])
-    
-    more_chords = shift_octave(match_parts_to_form(presets["form"], full_chords), -2)
-    song = match_parts_to_form(presets["form"], pieces)
-
-    return song + more_chords
+    melody = match_parts_to_form(presets["form"], pieces)
+    if make_hand_motions:
+        hand_motions = generate_hand_motions(parts, presets["meter"])
+        hands = match_parts_to_form(presets["form"], hand_motions)
+        return melody + hands
+    else:
+        return melody
 
 # Assumes no overlap
 def sync_note_durations(notes):
@@ -180,7 +176,7 @@ def write_to_midi(song):
     track    = 0
     channel  = 0
     time     = 0   # In beats
-    tempo    = 130 # In BPM
+    tempo    = 160 # In BPM
     volume   = 100 # 0-127, as per the MIDI standard
 
     MyMIDI = MIDIFile(1) # One track, defaults to format 1 (tempo track
@@ -219,7 +215,7 @@ def handle_input(command):
 chords = ['Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7', 'Bbmaj7', 'Bm11', 'E7', 'Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7']
-p = generate_song_and_chords(Presets)
+p = generate_song_and_chords(Presets, True)
 # p = generate_song_from_chords(Presets, chords, True)
 write_to_midi(p)
 

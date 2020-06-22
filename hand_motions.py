@@ -68,11 +68,15 @@ def seesaw(chords, meter, rhythm):
             time_length += Space_Values[current_rhythm[j]]
     return notes
 
-def arpeggios(chords, meter, rhythm):
+def arpeggios(chords, meter, rhythm, *direction):
     min_chord_length = min_chord_size(chords)
-    # whether the first beat is lower than the second 
-    direction = random.choice([list(range(0, min_chord_length)),
-                               list(range(min_chord_length, 0, -1))])
+    
+    if not direction:
+        direction = random.choice([list(range(0, min_chord_length)),
+                                   list(range(min_chord_length-1, -1, -1))])
+    else:
+        direction = direction[0]
+
     measure_length = meter[0]/(meter[1]/4)
     notes = []
     time_length = 0
@@ -87,11 +91,10 @@ def arpeggios(chords, meter, rhythm):
             else:
                 current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
         for j in range(measure_size):
-            for k in range(len(direction)):
-                if j % len(direction) == k:
-                    notes.append([chords[i][0][k], current_rhythm[j], time_length])
+            notes.append([chords[i][0][direction[j % len(direction)]], current_rhythm[j], time_length])
             time_length += Space_Values[current_rhythm[j]]
     return notes
+
 
 def full_chord(chords, meter, rhythm, *guitar_strum):
     measure_length = meter[0]/(meter[1]/4)
@@ -173,7 +176,7 @@ def pick_hand_motion(chords, meter, rhythm):
     motion = random.randint(0,4) 
     # return full_chord(chords, me ter, rhythm)
     # return walking_bass(chords, meter)
-    # return arpeggios(chords, meter, rhythm)
+    # return arpeggios(chords, meter, ['en', 'en', 'en', 'en', 'en', 'en', 'en', 'en'], [1, 2, 0, 1, 1, 2, 0, 1])
     # return seesaw(chords, meter, rhythm)
     # return octave_doubling(chords, meter, rhythm)
     if motion == 0:
@@ -220,6 +223,7 @@ def generate_hand_motion(chords, meter, **args):
             beats = generate_rhythm_from_meter(meter, rhythm_len=l)
         else:
             beats = generate_rhythm_from_meter(meter)
+
 
     # determine how much shift_octave to do
     if "hand" in args:
