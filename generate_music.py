@@ -13,8 +13,8 @@ from midiutil import MIDIFile
 
 Presets = {
     "meter"      : (4,4),
-    "key"        : "Ionian",
-    "base"       : "C",
+    "key"        : "Phrygian",
+    "base"       : "A",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "form"       : Forms["Ballade"],
     "rhythm_length" : 2,

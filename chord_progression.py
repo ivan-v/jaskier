@@ -47,18 +47,9 @@ def make_full_chord_progression(applied_key, *input_tonics):
     tonics = input_tonics[0]
   else:
     tonics = generate_chord_progression()
-  chords = [[0,4,7],[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,3,7],[0,3,6]]
   selected_chords = [[0, m[tonic+2]-m[tonic], m[tonic+4]-m[tonic]] for tonic in tonics]
-  return [[note + applied_key[1][0][i] + applied_key[1][1]
+  return [[note + applied_key[1][0][tonics[i]] + applied_key[1][1]
            for note in selected_chords[i]] for i in range(len(selected_chords))]
-
-a= make_full_chord_progression(apply_key("Ionian", "C"), [0,1,2,3,4,5,6])
-# print(a)
-
-def make_chord_progression(chord_names):
-  for name in chord_names:
-    pass
-  return
 
 
 def generate_pitches_from_chords(chord_progression, applied_key):
@@ -78,13 +69,12 @@ def generate_pitches_from_chords(chord_progression, applied_key):
 
   return pitches
 
-
 def generate_full_chord_sequence(applied_key, *input_chords):
   if input_chords:
     chords = make_full_chord_progression(applied_key, input_chords[0])
   else:
     chords = make_full_chord_progression(applied_key)
-  return chords# generate_pitches_from_chords(chords, applied_key)
+  return chords
 
 
 def available_pitches_in_full_chord(chord):
