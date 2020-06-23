@@ -1,19 +1,19 @@
 import math
 
 from chord_progression import generate_full_chord_sequence, Special_Chords, convert_chord_names_to_over_measures, invert_chords_in_progression
-from forms import Forms, pick_random_form, match_parts_to_form, match_and_alter_parts_to_form
+from forms import Forms, pick_random_form, match_parts_to_form
 from hand_motions import generate_hand_motions
 from melodic_alteration import insert_passing_tones, strip_part
+from midiutil import MIDIFile
 from modes_and_keys import apply_key, Starting_Pitch
 from motif_generator import generate_pitches
 from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets, replace_some_quarters_with_eights, Space_Values
-from stems import shift_octave#, generate_arpeggios, full_walking_bass_over_form, full_bass_chords_over_form
+from stems import shift_octave
 
-from midiutil import MIDIFile
 
 Presets = {
     "meter"      : (4,4),
-    "key"        : "Phrygian",
+    "key"        : "Pentatonic",
     "base"       : "A",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "form"       : Forms["Ballade"],
@@ -160,7 +160,9 @@ def generate_song_from_chords(presets, given_chords, *make_hand_motions):
     chords = invert_chords_in_progression(chords)
     parts = {"A": chords}
     pieces = generate_melody_pieces(presets, parts, given_chords)
-    song = match_and_alter_parts_to_form(Forms["One-part"], pieces)
+    # TODO: fix match_and_alter_parts_to_form
+    song = match_parts_to_form(Forms["One-part"], pieces)
+    # song = match_and_alter_parts_to_form(Forms["One-part"], pieces)
     melody = sync_note_durations(song)
     if make_hand_motions:
         hand_motions = generate_hand_motions(parts, presets["meter"])
@@ -172,7 +174,7 @@ def generate_song_from_chords(presets, given_chords, *make_hand_motions):
 
 
 # For now, "song" format assumes [note1, note2, note3, ...]
-def write_to_midi(song):
+def write_to_midi(song, filename):
     track    = 0
     channel  = 0
     time     = 0   # In beats
@@ -186,11 +188,11 @@ def write_to_midi(song):
     for i in range(len(song)):
         MyMIDI.addNote(track, channel, song[i][0], song[i][2], Space_Values[song[i][1]], volume)
 
-    with open("song.mid", "wb") as output_file:
+    with open(filename + ".mid", "wb") as output_file:
         MyMIDI.writeFile(output_file)
 
 
-# TODO: Proper type-checking
+# TODO: Proper type-checking, maybe?
 def handle_set(command):
     try:
         Presets[command[1]]
@@ -215,7 +217,10 @@ def handle_input(command):
 chords = ['Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7', 'Bbmaj7', 'Bm11', 'E7', 'Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7']
+
+# Both of these work \/
+
 p = generate_song_and_chords(Presets, True)
 # p = generate_song_from_chords(Presets, chords, True)
-write_to_midi(p)
+write_to_midi(p, "song")
 
