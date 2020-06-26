@@ -1,7 +1,7 @@
 import math
 
 from chord_progression import generate_full_chord_sequence, Special_Chords, convert_chord_names_to_over_measures, invert_chords_in_progression
-from forms import Forms, pick_random_form, match_parts_to_form
+from forms import Forms, pick_random_form, match_parts_to_form, match_and_alter_parts_to_form, sync_note_durations
 from hand_motions import generate_hand_motions
 from melodic_alteration import insert_passing_tones, strip_part
 from midiutil import MIDIFile
@@ -114,7 +114,7 @@ def reset_chord_times(chords, meter):
     return result
 
 
-def generate_song_and_chords(presets, *make_hand_motions):
+def generate_song_and_chords(presets, make_hand_motions):
     
     applied_key = apply_key(presets["key"], presets["base"])
     parts = generate_parts_and_chords(presets, applied_key)
@@ -122,7 +122,7 @@ def generate_song_and_chords(presets, *make_hand_motions):
     chords = compute_chord_times(parts, presets["form"], presets["meter"])
     chords = invert_chords_in_progression(chords)
     pieces = generate_melody_pieces(presets, parts, chords)
-    melody = match_parts_to_form(presets["form"], pieces)
+    melody = match_and_alter_parts_to_form(presets["form"], pieces)
     final_note = [[melody[0][0], 'wn', melody[-1][2] + Space_Values[melody[-1][1]]]]
     if make_hand_motions:
         hand_motions = generate_hand_motions(parts, presets["meter"])
@@ -131,13 +131,7 @@ def generate_song_and_chords(presets, *make_hand_motions):
     else:
         return melody + final_note
 
-# Assumes no overlap
-def sync_note_durations(notes):
-    time_length = 0
-    for i in range(len(notes)):
-        notes[i][2] = time_length
-        time_length += Space_Values[notes[i][1]]
-    return notes
+
 
 
 def sort_notes_into_measures(notes, meter):
@@ -162,9 +156,7 @@ def generate_song_from_chords(presets, given_chords, *make_hand_motions):
     chords = invert_chords_in_progression(chords)
     parts = {"A": chords}
     pieces = generate_melody_pieces(presets, parts, given_chords)
-    # TODO: fix match_and_alter_parts_to_form
-    song = match_parts_to_form(Forms["One-part"], pieces)
-    # song = match_and_alter_parts_to_form(Forms["One-part"], pieces)
+    song = match_and_alter_parts_to_form(Forms["One-part"], pieces)
     melody = sync_note_durations(song)
     final_note = [[melody[0][0], 'wn', melody[-1][2] + Space_Values[melody[-1][1]]]]
     if make_hand_motions:
@@ -173,7 +165,6 @@ def generate_song_from_chords(presets, given_chords, *make_hand_motions):
         return melody + hands + final_note
     else:
         return melody + final_note
-    # TODO: Add whole note at the end, maybe?
 
 
 def generate_n_hands(presets, n, *given_chords):
@@ -210,8 +201,6 @@ def generate_n_hands(presets, n, *given_chords):
             hand_motion[part] = shift_octave(hand_motion[part], shift)
         hands += match_parts_to_form(form, hand_motion)
 
-    # Dubious \/
-    # print(hand_motions)
     return hands
 
 # For now, "song" format assumes [note1, note2, note3, ...]
@@ -261,8 +250,8 @@ chords = ['Am', 'G', 'Fmaj7', 'Em',
 
 # Both of these work \/
 
-# p = generate_song_and_chords(Presets, True)
-p = generate_n_hands(Presets, 5)
+p = generate_song_and_chords(Presets, False)
+# p = generate_n_hands(Presets, 5)
 # p = generate_song_from_chords(Presets, chords, True)
 write_to_midi(p, "song")
 

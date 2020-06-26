@@ -35,7 +35,7 @@ Special_Chords = {
   "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
 }
 
-# TODO: Needs a fair bit of work 
+# TODO: Make jazzy version 
 def make_full_chord_progression(applied_key, *input_tonics):
   result = []
   m = applied_key[1][0]

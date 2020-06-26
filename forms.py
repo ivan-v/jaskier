@@ -22,6 +22,17 @@ def pick_random_form():
     name = random.choice(list(Forms))
     return (name, Forms[name])
 
+# Assumes no overlap
+def sync_note_durations(notes, *starting_time):
+    result = []
+    if starting_time:
+        time_length = starting_time[0]
+    else:
+        time_length = 0
+    for i in range(len(notes)):
+        result.append([notes[i][0], notes[i][1], time_length])
+        time_length += Space_Values[notes[i][1]]
+    return result
 
 # Matching parts also syncs the notes correctly
 
@@ -38,34 +49,34 @@ def match_parts_to_form(form, parts):
                 time_length += Space_Values[notes[0][1]]
     return result
 
-# TODO: Needs fix/update
+
 def match_and_alter_parts_to_form(form, parts):
     result = []
-    # introduced = []
-    # alterated = []
+    introduced = []
+    alterated = []
     time_length = 0
     for i in range(len(form)):
-        done_notes = set()
-        for note in parts[form[i]]:
-            for some_note in parts[form[i]]:
-                if some_note is note and str(some_note) not in done_notes:
-                    result.append([note[0], note[1], time_length])
-                    done_notes.add(str(note))
-                elif some_note[2] == note[2] \
-                    and some_note is not note \
-                    and str(some_note) not in done_notes:
-                    result.append([note[0], note[1], time_length])
-            time_length += Space_Values[note[1]]
-    #     if parts[form[i]] not in introduced:
-    #         introduced += [parts[form[i]]]
-    #         result += parts[form[i]]
-    #     elif i == len(form)-1:
-    #         result += parts[form[i]]
-    #     else:
-    #         option = alter_part(parts[form[i]])
-    #         while option in alterated:    
-    #             option = alter_part(parts[form[i]])
-    #         alterated += [option]
-    #         result += option
+        subresult = []
+        times = list(set([note[2] for note in parts[form[i]]]))
+        times.sort()
+        for j in times:
+            notes = [note for note in parts[form[i]] if note[2] == j]
+            if notes != []:
+                [subresult.append([note[0], note[1], time_length])
+                                                 for note in notes]
+                time_length += Space_Values[notes[0][1]]
+        if parts[form[i]] not in introduced:
+            introduced += [parts[form[i]]]
+            result += subresult
+        elif i == len(form)-1:
+            result += subresult
+        else:
+            option = sync_note_durations(alter_part(subresult),
+                                                subresult[0][2])
+            while [[[note[0], note[1]] for note in option]] \
+                                                in alterated:
+                option = alter_part(subresult)
+            alterated += [option]
+            result += option
     return result
 

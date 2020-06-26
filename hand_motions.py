@@ -121,7 +121,6 @@ def full_chord(chords, meter, rhythm, *guitar_strum):
             time_length += Space_Values[current_rhythm[j]]
     return notes
 
-# TODO: Needs good polish
 def walking_bass(chords, meter):
     measure_length = meter[0]/(meter[1]/4)
     notes = []
