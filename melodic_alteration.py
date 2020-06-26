@@ -247,15 +247,15 @@ def insert_n_trills(sequence, i, n, note):
 # Replaces longer notes with connecting trills
 def add_quarter_trills(sequence):
     for i in range(len(sequence[0])-1):
-        if sequence[0][i] - sequence[0][i+1] < 6:
+        if abs(sequence[0][i] - sequence[0][i+1]) < 6:
             if sequence[1][i] == 'hn' == sequence[1][i+1]:
-                sequence = insert_n_trills(sequence, i, 2, 'qn')
+                sequence = insert_n_trills(sequence, i, 4, 'qn')
     return sequence
 
 
 def add_eighth_trills(sequence):
     for i in range(len(sequence[0])-1):
-        if sequence[0][i] - sequence[0][i+1] < 6:
+        if abs(sequence[0][i] - sequence[0][i+1]) < 6:
             if ((sequence[1][i] == 'hn' and sequence[1][i+1] == 'qn') or \
                 (sequence[1][i] == 'qn' and sequence[1][i+1] == 'hn')):
                 sequence = insert_n_trills(sequence, i, 3, 'en')

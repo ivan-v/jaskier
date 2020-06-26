@@ -74,9 +74,11 @@ def match_and_alter_parts_to_form(form, parts):
             option = sync_note_durations(alter_part(subresult),
                                                 subresult[0][2])
             while [[[note[0], note[1]] for note in option]] \
-                                                in alterated:
+                                                in alterated \
+                and (subresult[-1][2] - subresult[0][2]) \
+                     - (option[-1][2] - option[0][2]) != 0:
                 option = alter_part(subresult)
-            alterated += [option]
+            alterated += [[[note[0], note[1]] for note in option]]
             result += option
     return result
 

@@ -13,8 +13,8 @@ from stems import shift_octave
 
 Presets = {
     "meter"      : (4,4),
-    "key"        : "Ionian",
-    "base"       : "Ab",
+    "key"        : "Aeolian",
+    "base"       : "D",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "form"       : Forms["Ballade"],
     "rhythm_length" : 2,
@@ -88,7 +88,6 @@ def generate_melody_pieces(presets, parts, given_chords):
         melody = sync_note_durations(melody)
         with_passing_tones = insert_passing_tones(strip_part(melody), 1, .5, chords, presets["meter"])
         pieces[part] = merge_pitches_with_rhythm(with_passing_tones[0], with_passing_tones[1])
-        pieces[part] = melody
     return pieces
 
 def compute_chord_times(parts, form, meter):
@@ -125,12 +124,21 @@ def generate_song_and_chords(presets, make_hand_motions):
     melody = match_and_alter_parts_to_form(presets["form"], pieces)
     final_note = [[melody[0][0], 'wn', melody[-1][2] + Space_Values[melody[-1][1]]]]
     if make_hand_motions:
+        for part in parts:
+            for i in range(presets["repetitions_in_part"]):
+                if i < presets["repetitions_in_part"]-1:
+                    parts[part] += parts[part]
         hand_motions = generate_hand_motions(parts, presets["meter"])
         hands = match_parts_to_form(presets["form"], hand_motions)
+        # no hand motion for the first time a melody is played in the piece
+        for i in range(len(hands)):
+            index = int(len(pieces[presets["form"][0]])/presets["repetitions_in_part"])
+            if int(hands[i][2]) >= int(melody[index][2]):
+                hands = hands[i:]
+                break
         return melody + hands + final_note
     else:
         return melody + final_note
-
 
 
 
@@ -151,7 +159,7 @@ def sort_notes_into_measures(notes, meter):
     return measures
 
 
-def generate_song_from_chords(presets, given_chords, *make_hand_motions):
+def generate_song_from_chords(presets, given_chords, make_hand_motions):
     chords = convert_chord_names_to_over_measures(given_chords, presets["meter"])
     chords = invert_chords_in_progression(chords)
     parts = {"A": chords}
@@ -216,6 +224,14 @@ def write_to_midi(song, filename):
     MyMIDI.addTempo(track, time, tempo)
 
     for i in range(len(song)):
+        if song[i][0] < 60:
+            volume = 93
+        elif song[i][0] < 50:
+            volume = 89
+        elif song[i][0] < 45:
+            volume = 85
+        else:
+            volume = 100
         MyMIDI.addNote(track, channel, song[i][0], song[i][2], Space_Values[song[i][1]], volume)
 
     with open(filename + ".mid", "wb") as output_file:
@@ -250,8 +266,8 @@ chords = ['Am', 'G', 'Fmaj7', 'Em',
 
 # Both of these work \/
 
-p = generate_song_and_chords(Presets, False)
-# p = generate_n_hands(Presets, 5)
+p = generate_song_and_chords(Presets, True)
+# p = generate_n_hands(Presets, 2)
 # p = generate_song_from_chords(Presets, chords, True)
 write_to_midi(p, "song")
 
