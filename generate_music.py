@@ -13,8 +13,8 @@ from stems import shift_octave
 
 Presets = {
     "meter"      : (4,4),
-    "key"        : "Pentatonic",
-    "base"       : "A",
+    "key"        : "Ionian",
+    "base"       : "Ab",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "form"       : Forms["Ballade"],
     "rhythm_length" : 2,
@@ -80,13 +80,14 @@ def generate_melody_pieces(presets, parts, given_chords):
 
         bit = merge_pitches_with_rhythm(melody, sum(rhythm,[]))
         melody = bit
-        # Repetition is separate issue
-        # for i in range(presets["repetitions_in_part"]):
-        #     if i < presets["repetitions_in_part"]-1:
-        #         melody += melody
-        #         chords += chords
-        # with_passing_tones = insert_passing_tones(strip_part(melody), 1, .5, chords, presets["meter"])
-        # pieces[part] = merge_pitches_with_rhythm(with_passing_tones[0], with_passing_tones[1])
+        for i in range(presets["repetitions_in_part"]):
+            if i < presets["repetitions_in_part"]-1:
+                melody += melody
+                chords += chords
+        chords = reset_chord_times(chords, presets["meter"])
+        melody = sync_note_durations(melody)
+        with_passing_tones = insert_passing_tones(strip_part(melody), 1, .5, chords, presets["meter"])
+        pieces[part] = merge_pitches_with_rhythm(with_passing_tones[0], with_passing_tones[1])
         pieces[part] = melody
     return pieces
 
@@ -173,6 +174,44 @@ def generate_song_from_chords(presets, given_chords, *make_hand_motions):
     # TODO: Add whole note at the end, maybe?
 
 
+def generate_n_hands(presets, n, *given_chords):
+    applied_key = apply_key(presets["key"], presets["base"])
+    if given_chords:
+        parts = given_chords
+        form = Forms["One-part"]
+    else:
+        form = presets["form"]
+        parts = generate_parts_and_chords(presets, applied_key)
+    chords = compute_chord_times(parts, form, presets["meter"])
+    chords = invert_chords_in_progression(chords)
+    hands = []
+    hand_motions = []
+    for i in range(n):
+        hand_motion = generate_hand_motions(parts, presets["meter"])
+        while hand_motion in hand_motions:
+            hand_motion = generate_hand_motions(parts, presets["meter"])
+        hand_motions.append(hand_motion)
+        # assuming max num of simultaneous hands = 6
+        if i == 0:
+            shift = 2
+        elif i == 1:
+            shift = 0
+        elif i == 2:
+            shift = 3
+        elif i == 3:
+            shift = 1
+        elif i == 4:
+            shift = 4
+        else:
+            shift = -1
+        for part in hand_motion:
+            hand_motion[part] = shift_octave(hand_motion[part], shift)
+        hands += match_parts_to_form(form, hand_motion)
+
+    # Dubious \/
+    # print(hand_motions)
+    return hands
+
 # For now, "song" format assumes [note1, note2, note3, ...]
 def write_to_midi(song, filename):
     track    = 0
@@ -220,7 +259,8 @@ chords = ['Am', 'G', 'Fmaj7', 'Em',
 
 # Both of these work \/
 
-p = generate_song_and_chords(Presets, True)
+# p = generate_song_and_chords(Presets, True)
+p = generate_n_hands(Presets, 5)
 # p = generate_song_from_chords(Presets, chords, True)
 write_to_midi(p, "song")
 
