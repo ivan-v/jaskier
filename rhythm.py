@@ -1,6 +1,6 @@
 import random
 
-Space_Values = {"hn": 2, "qn": 1, "en": .5, "(3 % 8)": 1.5, "(1 % 3)": 1.0/3.0}
+Space_Values = {"wn": 4, "hn": 2, "qn": 1, "en": .5, "(3 % 8)": 1.5, "(1 % 3)": 1.0/3.0}
 
 # should add up to 1
 rhythm_pdf_presets = {

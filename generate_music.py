@@ -123,12 +123,13 @@ def generate_song_and_chords(presets, *make_hand_motions):
     chords = invert_chords_in_progression(chords)
     pieces = generate_melody_pieces(presets, parts, chords)
     melody = match_parts_to_form(presets["form"], pieces)
+    final_note = [[melody[0][0], 'wn', melody[-1][2] + Space_Values[melody[-1][1]]]]
     if make_hand_motions:
         hand_motions = generate_hand_motions(parts, presets["meter"])
         hands = match_parts_to_form(presets["form"], hand_motions)
-        return melody + hands
+        return melody + hands + final_note
     else:
-        return melody
+        return melody + final_note
 
 # Assumes no overlap
 def sync_note_durations(notes):
@@ -165,12 +166,13 @@ def generate_song_from_chords(presets, given_chords, *make_hand_motions):
     song = match_parts_to_form(Forms["One-part"], pieces)
     # song = match_and_alter_parts_to_form(Forms["One-part"], pieces)
     melody = sync_note_durations(song)
+    final_note = [[melody[0][0], 'wn', melody[-1][2] + Space_Values[melody[-1][1]]]]
     if make_hand_motions:
         hand_motions = generate_hand_motions(parts, presets["meter"])
         hands = match_parts_to_form(Forms["One-part"], hand_motions)
-        return melody + hands
+        return melody + hands + final_note
     else:
-        return melody
+        return melody + final_note
     # TODO: Add whole note at the end, maybe?
 
 
