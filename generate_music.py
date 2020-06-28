@@ -264,7 +264,7 @@ chords = ['Am', 'G', 'Fmaj7', 'Em',
   'Dm7', 'G7', 'Cmaj7', 'Bbmaj7', 'Bm11', 'E7', 'Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7']
 
-# Both of these work \/
+# All of these work \/
 
 p = generate_song_and_chords(Presets, True)
 # p = generate_n_hands(Presets, 2)

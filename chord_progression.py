@@ -35,7 +35,8 @@ Special_Chords = {
   "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
 }
 
-# TODO: Make jazzy version 
+# TODO: Make some of them 7th chords: 
+# https://en.wikipedia.org/wiki/Seventh_chord#/media/File:Seventh_chords_frequency.png
 def make_full_chord_progression(applied_key, *input_tonics):
   result = []
   m = applied_key[1][0]
@@ -104,6 +105,21 @@ def construct_chord(offset, chord_name, is_minor):
     num = int(num_string)
   else:
     num = 0
+  nums = []
+  modifier = ""
+  split_up = list(chord_name)
+  for i in range(len(split_up)):
+    if split_up[i].isdigit():
+      if i < len(split_up) - 1 and split_up[i+1].isdigit():
+        nums.append((int(split_up[i] + split_up[i+1]), modifier))
+        modifier = ""
+      else:
+        nums.append((int(split_up[i]), modifier))
+        modifier = ""
+    else:
+      if (split_up[i] == "#" or split_up[i] == "s" or split_up[i] == "b") \
+          and i > 1:
+        modifier = split_up[i]
 
   if is_minor:
     chord = [0, 3, 7]
@@ -114,45 +130,51 @@ def construct_chord(offset, chord_name, is_minor):
     chord = [0, 3, 6]
   elif "aug" in chord_name:
     chord = [0, 4, 8]
-
-  if num == 7:
-    if is_minor:
-      chord.append(chord[-1] + 3)
-    elif "dim" in chord_name:
+  if nums != []:
+    if nums[0][0] == 7:
+      if is_minor:
+        chord.append(chord[-1] + 3)
+      elif "dim" in chord_name:
+        chord.append(chord[-1] + 2)
+      elif "maj" in chord_name:
+        chord.append(chord[-1] + 4)
+      else:
+        chord.append(chord[-1] + 3)
+    elif nums[0][0] == 6:
       chord.append(chord[-1] + 2)
-    elif "maj" in chord_name:
-      chord.append(chord[-1] + 4)
-    else:
+    elif nums[0][0] == 9:
+      if is_minor:
+        chord.append(chord[-1] + 3)
+      elif "dim" in chord_name:
+        chord.append(chord[-1] + 2)
+      elif "maj" in chord_name:
+        chord.append(chord[-1] + 4)
+      else:
+        chord.append(chord[-1] + 3)
+      if "maj" in chord_name:
+        chord.append(chord[-1] + 3)
+      else:
+        chord.append(chord[-1] + 4)
+    elif nums[0][0] == 11:
+      if is_minor:
+        chord.append(chord[-1] + 3)
+      elif "dim" in chord_name:
+        chord.append(chord[-1] + 2)
+      elif "maj" in chord_name:
+        chord.append(chord[-1] + 4)
+      else:
+        chord.append(chord[-1] + 3)
+      if "maj" in chord_name:
+        chord.append(chord[-1] + 3)
+      else:
+        chord.append(chord[-1] + 4)
       chord.append(chord[-1] + 3)
-  elif num == 6:
-    chord.append(chord[-1] + 2)
-  elif num == 9:
-    if is_minor:
-      chord.append(chord[-1] + 3)
-    elif "dim" in chord_name:
-      chord.append(chord[-1] + 2)
-    elif "maj" in chord_name:
-      chord.append(chord[-1] + 4)
-    else:
-      chord.append(chord[-1] + 3)
-    if "maj" in chord_name:
-      chord.append(chord[-1] + 3)
-    else:
-      chord.append(chord[-1] + 4)
-  elif num == 11:
-    if is_minor:
-      chord.append(chord[-1] + 3)
-    elif "dim" in chord_name:
-      chord.append(chord[-1] + 2)
-    elif "maj" in chord_name:
-      chord.append(chord[-1] + 4)
-    else:
-      chord.append(chord[-1] + 3)
-    if "maj" in chord_name:
-      chord.append(chord[-1] + 3)
-    else:
-      chord.append(chord[-1] + 4)
-    chord.append(chord[-1] + 3)
+  for num in nums[1:]:
+    entry = int(num[0]/2)
+    if num[1] == "b":
+      chord[entry] -= 1
+    elif num[1] == "#" or num[1] == "s":
+      num[entry] += 1
 
   return [i + offset for i in chord]
 
@@ -188,8 +210,9 @@ def construct_chord_from_name(chord_name):
     print("Error: chord (starting pitch) name not found")
 
   offset = Starting_Pitch[name]
-  is_minor = 'm' in chord_name and (chord_name.index('m') >= len(chord_name)-3\
-             or chord_name[chord_name.index('m') + 2] != 'j')
+  is_minor = chord_name.count('m') > 1 or \
+             chord_name.count('m') == 1 and \
+             'dim' not in chord_name
 
   return construct_chord(offset, chord_name, is_minor)
 
