@@ -266,8 +266,8 @@ chords = ['Am', 'G', 'Fmaj7', 'Em',
 
 # All of these work \/
 
-p = generate_song_and_chords(Presets, True)
+# p = generate_song_and_chords(Presets, True)
 # p = generate_n_hands(Presets, 2)
 # p = generate_song_from_chords(Presets, chords, True)
-write_to_midi(p, "song")
+# write_to_midi(p, "song")
 

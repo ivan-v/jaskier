@@ -291,12 +291,25 @@ def invert_chords_in_progression(chords):
                                 for k in range(min([len(j[0])
                                     for j in [chords[i],chords[i+1]]]))]
         new_chord = chords[i+1]
+        attempts = 0
+        options = []
         while len(set(pitch_differences)) < min_chord_size-1:
             new_chord = invert_chord(new_chord)
             pitch_differences = [(new_chord[0][k] - chords[i][0][k]) % 12
                                     for k in range(min([len(j[0])
                                         for j in [chords[i], new_chord]]))]
+            options.append((new_chord, len(set(pitch_differences))))
+            attempts += 1
+            if attempts > 3:
+              lowest_diff = min([options[i][1] for i in range(len(options))])
+              for chord in options:
+                if chord[1] == lowest_diff:
+                  new_chord = chord[0]
+                  break
+              break
         result.append(new_chord)
+        if i == len(chords)-2:
+          return result
     return result
 
 
