@@ -32,7 +32,7 @@ def infer_key(pitches):
                 score += 1
         probabilities[key[0]] = score
     return max(probabilities, key=probabilities.get)
-
+# infer_key()
 
 def find_bridge(start, goal, length, fuller_mode):
     if goal not in fuller_mode:

@@ -8,9 +8,10 @@ from rhythm_track import Beat_Intensity_Presets
 C  = {"ii6": "Dm6",  "vii_halfdim": "Bm7b5",  "I": "C",  "V7": "G7",  "i": "Cm",  "vii_dim": "Bdim7"}
 Eb = {"ii6": "Fm6",  "vii_halfdim": "Dm7b5",  "I": "Eb", "V7": "Bb7", "i": "Ebm", "vii_dim": "Ddim7"}
 Gb = {"ii6": "Abm6", "vii_halfdim": "Fm7b5",  "I": "Gb", "V7": "Db7", "i": "Gbm", "vii_dim": "Fdim7"}
+Fs = {"ii6": "Abm6", "vii_halfdim": "Fm7b5",  "I": "Fs", "V7": "Db7", "i": "Fsm", "vii_dim": "Fdim7"}
 A  = {"ii6": "Bm6",  "vii_halfdim": "Gsm7b5", "I": "A",  "V7": "E7",  "i": "Am",  "vii_dim": "Gsdim7"}
 # Remember that the last element is also adjacent to the first element!
-Set_One = [C, Eb, Gb, A]
+Set_One = [C, Eb, Gb, Fs, A]
 
 B  = {"ii6": "Csm6", "vii_halfdim": "Asm7b5", "I": "B",  "V7": "Fs7", "i": "Bm",  "vii_dim": "Asdim7"}
 D  = {"ii6": "Em6",  "vii_halfdim": "Csm7b5", "I": "D",  "V7": "A7",  "i": "Dm",  "vii_dim": "Csdim7"}
@@ -62,7 +63,7 @@ def find_key_from_fifths(chords):
 
 def populate_blues_tabs_with_jazz_chords(meter, tab, *rhythm):
 	if not rhythm:
-		rhythm = generate_rhythm(meter, 1, False, Beat_Intensity_Presets["4"])
+		rhythm = generate_rhythm(meter, 1, False, Beat_Intensity_Presets["3"])
 	else:
 		rhythm = rhythm[0]
 	keys = find_key_from_fifths(tab)
@@ -151,7 +152,7 @@ def make_coltrane_progression(meter, length, *first_note):
 	return notes
 
 
-notes = make_coltrane_progression((3,4), 20, "B")
+notes = make_coltrane_progression((3,4), 20, "Bb")
 
 # TODO: make generate_blues_keys
 

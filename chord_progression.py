@@ -31,6 +31,7 @@ def generate_chord_progression():
     progression = grow_chord_progression(progression)
   return progression
 
+
 Special_Chords = {
   "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
 }
@@ -49,8 +50,8 @@ def make_full_chord_progression(applied_key, *input_tonics):
   else:
     tonics = generate_chord_progression()
   selected_chords = [[0, m[tonic+2]-m[tonic], m[tonic+4]-m[tonic]] for tonic in tonics]
-  return [[note + applied_key[1][0][tonics[i]] + applied_key[1][1]
-           for note in selected_chords[i]] for i in range(len(selected_chords))]
+  return ([[note + applied_key[1][0][tonics[i]] + applied_key[1][1]
+           for note in selected_chords[i]] for i in range(len(selected_chords))], tonics)
 
 
 def generate_pitches_from_chords(chord_progression, applied_key):

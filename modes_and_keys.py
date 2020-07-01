@@ -49,6 +49,13 @@ Starting_Pitch = {
 }
 
 
+def dominant_key_of_tonic(tonic_key):
+  new_root = tonic_key[1][1] + tonic_key[1][0][4]
+  if new_root > 71:
+    new_root -= 12
+  new_pitch = list(Starting_Pitch.keys())[list(Starting_Pitch.values()).index(new_root)]
+  return apply_key(tonic_key[0].split()[1], new_pitch)
+
 
 def apply_key(mode, pitch):
   modulo = Modes[mode] # + Keys[key][i]

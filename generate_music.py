@@ -6,21 +6,29 @@ from hand_motions import generate_hand_motions
 from melodic_alteration import insert_passing_tones, strip_part
 from midiutil import MIDIFile
 from modes_and_keys import apply_key, Starting_Pitch
-from motif_generator import generate_pitches
+from motif_generator import generate_melody
 from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets, replace_some_quarters_with_eights, Space_Values
 from stems import shift_octave
 
 
 Presets = {
     "meter"      : (4,4),
-    "key"        : "Aeolian",
-    "base"       : "D",
+    "key"        : "Ionian",
+    "base"       : "B",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "form"       : Forms["Ballade"],
     "rhythm_length" : 2,
     "rhythm_repetition_in_mel" : 3,
     "repetitions_in_part" : 2,
+    "repeat_chord_progression_in_part" : 1,
+    "max_step_size" : 13,
+    "pitch_range": 20,
 }
+
+applied_key = apply_key("Aeolian", "D")
+# print(generate_full_chord_sequence(applied_key))
+# print(sum(list(map(lambda x: [i + 12*x for i in applied_key[1][0]],
+#                              range(2,9))), []))
 
 def repeat_section(section, times):
     return sum([section for i in range(times)], [])
@@ -28,6 +36,7 @@ def repeat_section(section, times):
 
 def generate_parts_and_chords(presets, applied_key):
     parts = {}
+    progressions = {}
     for part in presets["form"]:
         if part not in parts:
             option = generate_full_chord_sequence(applied_key)
@@ -35,59 +44,36 @@ def generate_parts_and_chords(presets, applied_key):
             while option in list(parts.values()):
                 option = generate_full_chord_sequence(applied_key)
                                       # Special_Chords["8-bar blues"])
-            parts[part] = repeat_section(option, presets["repetitions_in_part"])
-    return parts
+            parts[part] = repeat_section(option[0], presets["repeat_chord_progression_in_part"])
+            progressions[part] = repeat_section(option[1], presets["repeat_chord_progression_in_part"])
+    return [parts, progressions]
 
 
-def generate_melody_pieces(presets, parts, given_chords):
+def generate_melody_pieces(presets, parts, given_chords, progressions, applied_key):
     pieces = {}
     for part in parts:
-        chords = parts[part]
-        base = Starting_Pitch[presets["base"]]
-        rhythmic_backbone = generate_rhythm(presets["meter"], 
-                                            presets["rhythm_length"],
-                                            True, presets["rhythm_pdf"])
-
-        rhythmic_backbone = replace_some_quarters_with_eights(rhythmic_backbone, 3)
-        rhythm = repeat_section(rhythmic_backbone,
-                                math.ceil(len(chords)/len(rhythmic_backbone)))
-        
-        length = 0
-        for i in range(len(chords)):
-            if type(given_chords[i]) == list and \
-               type(given_chords[i][0]) == str:
-                length += given_chords[i][1]
-            else:
-                length += 1
-
-        while length > len(rhythm):
-            rhythm += rhythmic_backbone
-
-        # TODO: improve (currently pops .5 of the rhythm-measure at a time)
-        rhythm_len = len(rhythm)
-        while rhythm_len > length:
-            if rhythm[-1] == []:
-                rhythm.pop()
-            rhythm[-1] = rhythm[-1][0:int(len(rhythm[-1])/2)]
-            rhythm_len -= .5
-
-        chords = reset_chord_times(chords, presets["meter"])
-        # TODO: Better selection of # of repetitions for rhythm per melody
-        melody_length = len(sum(rhythm, []))
-        melody = generate_pitches(melody_length, base, 18, chords, rhythm)
-        while len(melody) > len(sum(rhythm,[])):
-            melody.pop()
-
-        bit = merge_pitches_with_rhythm(melody, sum(rhythm,[]))
-        melody = bit
+        chords = reset_chord_times(parts[part], presets["meter"])
+        base = applied_key[1][1]
+        fuller = sum(
+                    list(
+                        map(lambda x: [i + 12 * x + base for i in applied_key[1][0]],
+                            range(-3, 3))), [])
+        melody = generate_melody(
+            applied_key, chords, progressions[part], presets["rhythm_pdf"], 2,
+            presets["rhythm_repetition_in_mel"], presets["meter"],
+            presets["pitch_range"], presets["max_step_size"], fuller)
+        melody = sync_note_durations(melody)
         for i in range(presets["repetitions_in_part"]):
             if i < presets["repetitions_in_part"]-1:
                 melody += melody
                 chords += chords
         chords = reset_chord_times(chords, presets["meter"])
         melody = sync_note_durations(melody)
-        with_passing_tones = insert_passing_tones(strip_part(melody), 1, .5, chords, presets["meter"])
-        pieces[part] = merge_pitches_with_rhythm(with_passing_tones[0], with_passing_tones[1])
+        with_passing_tones = insert_passing_tones(
+            strip_part(melody), 1, .5, chords, presets["meter"])
+        pieces[part] = merge_pitches_with_rhythm(with_passing_tones[0],
+                                                 with_passing_tones[1])
+
     return pieces
 
 def compute_chord_times(parts, form, meter):
@@ -116,11 +102,15 @@ def reset_chord_times(chords, meter):
 def generate_song_and_chords(presets, make_hand_motions):
     
     applied_key = apply_key(presets["key"], presets["base"])
-    parts = generate_parts_and_chords(presets, applied_key)
-
+    parts_and_progressions = generate_parts_and_chords(presets, applied_key)
+    
+    parts = parts_and_progressions[0]
+    progressions = parts_and_progressions[1]
+    
     chords = compute_chord_times(parts, presets["form"], presets["meter"])
     chords = invert_chords_in_progression(chords)
-    pieces = generate_melody_pieces(presets, parts, chords)
+
+    pieces = generate_melody_pieces(presets, parts, chords, progressions, applied_key)
     melody = match_and_alter_parts_to_form(presets["form"], pieces)
     final_note = [[melody[0][0], 'wn', melody[-1][2] + Space_Values[melody[-1][1]]]]
     if make_hand_motions:
@@ -266,8 +256,8 @@ chords = ['Am', 'G', 'Fmaj7', 'Em',
 
 # All of these work \/
 
-# p = generate_song_and_chords(Presets, True)
+p = generate_song_and_chords(Presets, True)
 # p = generate_n_hands(Presets, 2)
 # p = generate_song_from_chords(Presets, chords, True)
-# write_to_midi(p, "song")
+write_to_midi(p, "song") 
 
