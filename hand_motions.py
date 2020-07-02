@@ -4,6 +4,7 @@ from rhythm import Space_Values
 from rhythm_track import generate_rhythmic_beat, generate_rhythmic_motion
 from stems import choose_leading_tone, shift_octave
 
+from itertools import permutations # for arpeggios with random directions
 
 def min_chord_size(chords):
     return min([len(i[0]) for i in chords])
@@ -79,21 +80,24 @@ def seesaw(chords, meter, rhythm):
     return notes
 
 
-def arpeggios(chords, meter, rhythm, *direction):
+def arpeggios(chords, meter, rhythm, random_direction, *direction):
     min_chord_length = min_chord_size(chords)
 
-    if not direction:
-        direction = random.choice([
-            list(range(0, min_chord_length)),
-            list(range(min_chord_length - 1, -1, -1))
-        ])
-    else:
-        direction = direction[0]
+    if not random_direction:
+        if not direction:
+            direction = random.choice([
+                list(range(0, min_chord_length)),
+                list(range(min_chord_length - 1, -1, -1))
+            ])
+        else:
+            direction = direction[0]
 
     measure_length = meter[0] / (meter[1] / 4)
     notes = []
     time_length = 0
     for i in range(len(chords)):
+
+
         # \/ size of measure for the chord
         measure_size = int(
             len(rhythm) *
@@ -105,14 +109,24 @@ def arpeggios(chords, meter, rhythm, *direction):
                 current_rhythm += rhythm
             else:
                 current_rhythm += current_rhythm[:int(len(rhythm) / 2) + 1]
+        if random_direction:
+            direction = random.choice(
+               [list(i) for i in list(permutations(range(0, min_chord_length)))]
+            )
+        notes_in_direction_completed = 0
         for j in range(measure_size):
             notes.append([
                 chords[i][0][direction[j % len(direction)]], current_rhythm[j],
                 time_length
             ])
+            notes_in_direction_completed += 1
+            if notes_in_direction_completed >= min_chord_length:
+                if random_direction:
+                    direction = random.choice(
+                       [list(i) for i in list(permutations(range(0, min_chord_length)))]
+                    )
             time_length += Space_Values[current_rhythm[j]]
     return notes
-
 
 
 def full_chord(chords, meter, rhythm, *guitar_strum):
@@ -206,7 +220,7 @@ def running_scale(pitches):
     return
 
 def pick_hand_motion(chords, meter, rhythm):
-    motion = random.randint(0,4) 
+    motion = random.randint(0,4)
     # return full_chord(chords, me ter, rhythm)
     # return walking_bass(chords, meter)
     # return arpeggios(chords, meter, ['en', 'en', 'en', 'en', 'en', 'en', 'en', 'en'], [1, 2, 0, 1, 1, 2, 0, 1])
@@ -217,7 +231,7 @@ def pick_hand_motion(chords, meter, rhythm):
     elif motion == 1:
         return full_chord(chords, meter, rhythm)
     elif motion == 2:
-        return arpeggios(chords, meter, rhythm)
+        return arpeggios(chords, meter, rhythm, False)
     elif motion == 3:
         return walking_bass(chords, meter)
     else:
@@ -256,7 +270,6 @@ def generate_hand_motion(chords, meter, **args):
             beats = generate_rhythm_from_meter(meter, rhythm_len=l)
         else:
             beats = generate_rhythm_from_meter(meter)
-
 
     # determine how much shift_octave to do
     if "hand" in args:

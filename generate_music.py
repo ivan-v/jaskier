@@ -13,16 +13,15 @@ from stems import shift_octave
 
 Presets = {
     "meter"      : (4,4),
-    "key"        : "Ionian",
-    "base"       : "B",
+    "key"        : "Aeolian",
+    "base"       : "D",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "form"       : Forms["Ballade"],
-    "rhythm_length" : 2,
     "rhythm_repetition_in_mel" : 3,
     "repetitions_in_part" : 2,
     "repeat_chord_progression_in_part" : 1,
     "max_step_size" : 13,
-    "pitch_range": 20,
+    "pitch_range": 17,
 }
 
 
@@ -208,11 +207,14 @@ def generate_n_hands(presets, n, *given_chords):
     return hands
 
 # For now, "song" format assumes [note1, note2, note3, ...]
-def write_to_midi(song, filename):
+def write_to_midi(song, filename, *tempo):
     track    = 0
     channel  = 0
     time     = 0   # In beats
-    tempo    = 160 # In BPM
+    if not tempo:
+        tempo    = 160 # In BPM
+    else:
+        tempo = tempo[0]
     volume   = 100 # 0-127, as per the MIDI standard
 
     MyMIDI = MIDIFile(1) # One track, defaults to format 1 (tempo track
@@ -243,8 +245,6 @@ def handle_set(command):
         if command[1] == "meter":
             Presets[command[1]] = tuple([int(command[2]), int(command[3])])
         elif command[1] == "base":
-            Presets[command[1]] = int(command[2])
-        elif command[1] == "rhythm_length":
             Presets[command[1]] = int(command[2])
         elif command[1] == "rhythm_repetition_in_mel":
             Presets[command[1]] = int(command[2])

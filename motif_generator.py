@@ -69,7 +69,7 @@ def convert_pitches_to_dominant_key(given_pitches, base, tonic_key):
                    for i in range(len(given_pitches))]
     return new_pitches
 
-def generate_ap(chords, rhythm):
+def generate_ap(chords, rhythm, fuller_mode, pitch_range, base):
     chords_without_duration = [chord[0] for chord in chords]
     av = [sum(chord, []) for chord
           in available_pitches_in_chords(chords_without_duration)]
@@ -83,30 +83,30 @@ def generate_ap(chords, rhythm):
         for j in range(len(rhythm[i])):
             closest = max([i for i in durations if i <= time_length])
             ap.append(av_with_duration[closest])
-            time_length += Space_Values[rhythm[i][j]]  
+            time_length += Space_Values[rhythm[i][j]] 
+    for i in range(len(ap)):
+        # Give a weighed preference towards pitches in the chord
+        # (as compared to the scale)
+        ap[i] = [val for val in ap[i] for _ in (0, 1)]
+        ap[i] = [val for val in ap[i] for _ in (0, 1)]
+        ap[i] += fuller_mode
+    # Make the pitches within the pitch_range
+    ap = [[ap[i][j] for j in range(len(ap[i])) if pitch_range/2 > abs(ap[i][j] - base)]
+          for i in range(len(ap))] 
     return ap
 
 
 # eventual FIX we assume base is lowest pitch of the first chord
 def generate_pitches_for_melody(chords, chord_progression, pitch_range,
-                                meter, max_step_size, rhythm, applied_key, *fuller_mode):
+                                meter, max_step_size, rhythm, applied_key, fuller_mode):
     base = applied_key[1][1]
-    ap = generate_ap(chords, rhythm)
-   
-    if fuller_mode:
-        for i in range(len(ap)):
-            # Give a weighed preference towards pitches in the chord
-            # (as compared to the scale)
-            ap[i] = [val for val in ap[i] for _ in (0, 1)]
-            ap[i] = [val for val in ap[i] for _ in (0, 1)]
-            ap[i] += fuller_mode[0]
-    # Make the pitches within the pitch_range
-    ap = [[ap[i][j] for j in range(len(ap[i])) if pitch_range/2 > abs(ap[i][j] - base)]
-          for i in range(len(ap))]
+    ap = generate_ap(chords, rhythm, fuller_mode, pitch_range, base)
+
     result = []
     expected_motion = random.choice(["conjunct", "disjunct"])
     current_motion_count = 0
     motion_limit = 3
+    previous_five_notes = []
     for i in range(len(rhythm)):
         if len(result) == 0:
             measure = [base]
@@ -130,13 +130,21 @@ def generate_pitches_for_melody(chords, chord_progression, pitch_range,
                     expected_motion = "conjunct"
                     motion_limit = random.randint(2,5)
                 current_motion_count = 0
-            while abs(option - last_pitch) > max_step_size or \
+            # Make sure the same pitch isn't repeated more than 5 times consecutively
+            tries = 0
+            while len(set(previous_five_notes)) == 5 or \
+                  abs(option - last_pitch) > max_step_size or \
                   motion(option, last_pitch) != expected_motion:
                 option = random.choice(ap[i+j])
+                tries += 1
+                if tries > 80:
+                    break
             current_motion_count += 1
             measure.append(option)
+            if not len(previous_five_notes) < 5:
+                previous_five_notes.pop(0)
+            previous_five_notes.append(option)
         result.append(measure)
-    # NOT FINISHED \/
     # Now to force-insert motif(s)
     motif_len = chords[0][1][1]/(meter[0]/(meter[1]/4))
     if motif_len % 1 != 0:
