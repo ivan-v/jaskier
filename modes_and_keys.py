@@ -60,3 +60,9 @@ def dominant_key_of_tonic(tonic_key):
 def apply_key(mode, pitch):
   modulo = Modes[mode] # + Keys[key][i]
   return (str(pitch + " " + mode), (modulo, Starting_Pitch[pitch]))
+
+
+def make_key(name):
+  return apply_key(name.split()[1], name.split()[0])
+
+

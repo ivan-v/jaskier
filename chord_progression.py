@@ -36,40 +36,48 @@ Special_Chords = {
   "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
 }
 
-# TODO: Make some of them 7th chords: 
+# TODO: Make some of them 7th chords:
 # https://en.wikipedia.org/wiki/Seventh_chord#/media/File:Seventh_chords_frequency.png
 def make_full_chord_progression(applied_key, *input_tonics):
-  result = []
-  m = applied_key[1][0]
-  m += [i+12 for i in m]
-  m += [i+36 for i in m]
-  m.sort()
-  m = list(set(m))
-  if input_tonics:
-    tonics = input_tonics[0]
-  else:
-    tonics = generate_chord_progression()
-  selected_chords = [[0, m[tonic+2]-m[tonic], m[tonic+4]-m[tonic]] for tonic in tonics]
-  return ([[note + applied_key[1][0][tonics[i]] + applied_key[1][1]
-           for note in selected_chords[i]] for i in range(len(selected_chords))], tonics)
+    result = []
+    m = applied_key[1][0]
+    m += [i + 12 for i in m]
+    m += [i + 36 for i in m]
+    m.sort()
+    m = list(set(m))
+    if input_tonics:
+        tonics = input_tonics[0]
+    else:
+        tonics = generate_chord_progression()
+    selected_chords = [[0, m[tonic + 2] - m[tonic], m[tonic + 4] - m[tonic]]
+                       for tonic in tonics]
+    return ([[
+        note + applied_key[1][0][tonics[i]] + applied_key[1][1]
+        for note in selected_chords[i]
+    ] for i in range(len(selected_chords))], tonics)
 
 
 def generate_pitches_from_chords(chord_progression, applied_key):
-  
-  fuller_mode = sum(list(map(lambda x: [i + 12*x for i in applied_key[1][0]],
-                             range(-2,2))), [])
-  pitches = []
 
-  for tonic in chord_progression:
-    if type(tonic) is list:
-      chord = [(fuller_mode[int(len(fuller_mode)/2)+tonic[0]] + applied_key[1][1])]
-      for note in tonic[1:]:
-        chord.append(note + chord[0])  
-      pitches.append(chord)
-    else:
-      pitches.append(fuller_mode[int(len(fuller_mode)/2)+tonic] + applied_key[1][1])
+    fuller_mode = sum(
+        list(
+            map(lambda x: [i + 12 * x for i in applied_key[1][0]], range(
+                -2, 2))), [])
+    pitches = []
 
-  return pitches
+    for tonic in chord_progression:
+        if type(tonic) is list:
+            chord = [(fuller_mode[int(len(fuller_mode) / 2) + tonic[0]] +
+                      applied_key[1][1])]
+            for note in tonic[1:]:
+                chord.append(note + chord[0])
+            pitches.append(chord)
+        else:
+            pitches.append(fuller_mode[int(len(fuller_mode) / 2)
+                                       + tonic] + applied_key[1][1])
+
+    return pitches
+
 
 def generate_full_chord_sequence(applied_key, *input_chords):
   if input_chords:
@@ -286,31 +294,35 @@ def invert_chord(chord):
 def invert_chords_in_progression(chords):
     result = []
     result.append(chords[0])
-    for i in range(len(chords)-1):
-        min_chord_size = min([len(i[0]) for i in [chords[i], chords[i+1]]])
-        pitch_differences = [chords[i+1][0][k] - chords[i][0][k] % 12
-                                for k in range(min([len(j[0])
-                                    for j in [chords[i],chords[i+1]]]))]
-        new_chord = chords[i+1]
+    for i in range(len(chords) - 1):
+        min_chord_size = min([len(i[0]) for i in [chords[i], chords[i + 1]]])
+        pitch_differences = [
+            chords[i + 1][0][k] - chords[i][0][k] % 12
+            for k in range(
+                min([len(j[0]) for j in [chords[i], chords[i + 1]]]))
+        ]
+        new_chord = chords[i + 1]
         attempts = 0
         options = []
-        while len(set(pitch_differences)) < min_chord_size-1:
+        while len(set(pitch_differences)) < min_chord_size - 1:
             new_chord = invert_chord(new_chord)
-            pitch_differences = [(new_chord[0][k] - chords[i][0][k]) % 12
-                                    for k in range(min([len(j[0])
-                                        for j in [chords[i], new_chord]]))]
+            pitch_differences = [
+                (new_chord[0][k] - chords[i][0][k]) % 12
+                for k in range(
+                    min([len(j[0]) for j in [chords[i], new_chord]]))
+            ]
             options.append((new_chord, len(set(pitch_differences))))
             attempts += 1
             if attempts > 3:
-              lowest_diff = min([options[i][1] for i in range(len(options))])
-              for chord in options:
-                if chord[1] == lowest_diff:
-                  new_chord = chord[0]
-                  break
-              break
+                lowest_diff = min([options[i][1] for i in range(len(options))])
+                for chord in options:
+                    if chord[1] == lowest_diff:
+                        new_chord = chord[0]
+                        break
+                break
         result.append(new_chord)
-        if i == len(chords)-2:
-          return result
+        if i == len(chords) - 2:
+            return result
     return result
 
 

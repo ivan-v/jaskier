@@ -11,118 +11,141 @@ def min_chord_size(chords):
 
 def octave_doubling(chords, meter, rhythm):
     min_chord_length = min_chord_size(chords)
-    degree = generate_rhythmic_motion(min_chord_length, min_chord_length, True)[0]
-    measure_length = meter[0]/(meter[1]/4)
+    degree = generate_rhythmic_motion(min_chord_length, min_chord_length,
+                                      True)[0]
+    measure_length = meter[0] / (meter[1] / 4)
     notes = []
     time_length = 0
     for i in range(len(chords)):
         # \/ size of measure for the chord
-        measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
+        measure_size = int(
+            len(rhythm) *
+            ((chords[i][1][1] - chords[i][1][0]) / measure_length))
         current_rhythm = rhythm[0:len(rhythm)]
         # potential warning: is funky with small fractions, like .23 of a measure
         while measure_size > len(current_rhythm):
-            if len(current_rhythm) + len(rhythm) <= measure_size: 
+            if len(current_rhythm) + len(rhythm) <= measure_size:
                 current_rhythm += rhythm
             else:
-                current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
+                current_rhythm += current_rhythm[:int(len(rhythm) / 2) + 1]
         for j in range(measure_size):
-            notes.append([chords[i][0][degree], current_rhythm[j], time_length])
-            notes.append([chords[i][0][degree]-12, current_rhythm[j], time_length])
+            notes.append(
+                [chords[i][0][degree], current_rhythm[j], time_length])
+            notes.append(
+                [chords[i][0][degree] - 12, current_rhythm[j], time_length])
             time_length += Space_Values[current_rhythm[j]]
     return notes
 
 def seesaw(chords, meter, rhythm):
     min_chord_length = min_chord_size(chords)
-    degrees = generate_rhythmic_motion(min_chord_length, min_chord_length, False)
-    for i in range(min_chord_length-1):
-        if degrees[i] > degrees[i+1]:
-            degrees[i+1] += 12
+    degrees = generate_rhythmic_motion(min_chord_length, min_chord_length,
+                                       False)
+    for i in range(min_chord_length - 1):
+        if degrees[i] > degrees[i + 1]:
+            degrees[i + 1] += 12
     # whether num_pitches per beat is 2 1 2 1 2 or 1 2 1 2 1
-    heavier_side = random.randint(0,1)
-    # whether the first beat is lower than the second 
-    lower_side = random.choice([0,min_chord_length-1])
+    heavier_side = random.randint(0, 1)
+    # whether the first beat is lower than the second
+    lower_side = random.choice([0, min_chord_length - 1])
     if lower_side == 0:
-        upper_side = min_chord_length-1
+        upper_side = min_chord_length - 1
     else:
         upper_side = 0
-    measure_length = meter[0]/(meter[1]/4)
+    measure_length = meter[0] / (meter[1] / 4)
     notes = []
     time_length = 0
     for i in range(len(chords)):
         # \/ size of measure for the chord
-        measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
+        measure_size = int(
+            len(rhythm) *
+            ((chords[i][1][1] - chords[i][1][0]) / measure_length))
         current_rhythm = rhythm[0:len(rhythm)]
         # potential warning: is funky with small fractions, like .23 of a measure
         while measure_size > len(current_rhythm):
-            if len(current_rhythm) + len(rhythm) <= measure_size: 
+            if len(current_rhythm) + len(rhythm) <= measure_size:
                 current_rhythm += rhythm
             else:
-                current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
+                current_rhythm += current_rhythm[:int(len(rhythm) / 2) + 1]
         for j in range(measure_size):
             if j % 2 == 0:
-                notes.append([chords[i][0][lower_side], current_rhythm[j], time_length])
+                notes.append(
+                    [chords[i][0][lower_side], current_rhythm[j], time_length])
             if j % 2 == heavier_side:
                 notes.append([chords[i][0][1], current_rhythm[j], time_length])
             if j % 2 == 1:
-                notes.append([chords[i][0][upper_side], current_rhythm[j], time_length])
+                notes.append(
+                    [chords[i][0][upper_side], current_rhythm[j], time_length])
             time_length += Space_Values[current_rhythm[j]]
     return notes
+
 
 def arpeggios(chords, meter, rhythm, *direction):
     min_chord_length = min_chord_size(chords)
-    
+
     if not direction:
-        direction = random.choice([list(range(0, min_chord_length)),
-                                   list(range(min_chord_length-1, -1, -1))])
+        direction = random.choice([
+            list(range(0, min_chord_length)),
+            list(range(min_chord_length - 1, -1, -1))
+        ])
     else:
         direction = direction[0]
 
-    measure_length = meter[0]/(meter[1]/4)
+    measure_length = meter[0] / (meter[1] / 4)
     notes = []
     time_length = 0
     for i in range(len(chords)):
         # \/ size of measure for the chord
-        measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
+        measure_size = int(
+            len(rhythm) *
+            ((chords[i][1][1] - chords[i][1][0]) / measure_length))
         current_rhythm = rhythm[0:len(rhythm)]
         # potential warning: is funky with small fractions, like .23 of a measure
         while measure_size > len(current_rhythm):
-            if len(current_rhythm) + len(rhythm) <= measure_size: 
+            if len(current_rhythm) + len(rhythm) <= measure_size:
                 current_rhythm += rhythm
             else:
-                current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
+                current_rhythm += current_rhythm[:int(len(rhythm) / 2) + 1]
         for j in range(measure_size):
-            notes.append([chords[i][0][direction[j % len(direction)]], current_rhythm[j], time_length])
+            notes.append([
+                chords[i][0][direction[j % len(direction)]], current_rhythm[j],
+                time_length
+            ])
             time_length += Space_Values[current_rhythm[j]]
     return notes
 
 
+
 def full_chord(chords, meter, rhythm, *guitar_strum):
-    measure_length = meter[0]/(meter[1]/4)
+    measure_length = meter[0] / (meter[1] / 4)
     notes = []
     time_length = 0
     for i in range(len(chords)):
         # \/ size of measure for the chord
-        measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
+        measure_size = int(
+            len(rhythm) *
+            ((chords[i][1][1] - chords[i][1][0]) / measure_length))
         current_rhythm = rhythm[0:len(rhythm)]
         # potential warning: is funky with small fractions, like .23 of a measure
         while measure_size > len(current_rhythm):
-            if len(current_rhythm) + len(rhythm) <= measure_size: 
+            if len(current_rhythm) + len(rhythm) <= measure_size:
                 current_rhythm += rhythm
             else:
-                current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
+                current_rhythm += current_rhythm[:int(len(rhythm) / 2) + 1]
         for j in range(measure_size):
             strum_offset = 0
             for pitch in chords[i][0]:
                 if guitar_strum:
-                    notes.append([pitch, current_rhythm[j], time_length+strum_offset])
+                    notes.append(
+                        [pitch, current_rhythm[j], time_length + strum_offset])
                 else:
                     notes.append([pitch, current_rhythm[j], time_length])
                 strum_offset += .05
             time_length += Space_Values[current_rhythm[j]]
     return notes
 
+
 def walking_bass(chords, meter):
-    measure_length = meter[0]/(meter[1]/4)
+    measure_length = meter[0] / (meter[1] / 4)
     notes = []
     time_length = 0
     if meter[0] % 3 == 0:
@@ -137,35 +160,46 @@ def walking_bass(chords, meter):
             rhythm = ['en', 'en', 'en', 'en']
     for i in range(len(chords)):
         # \/ size of measure for the chord
-        measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
+        measure_size = int(
+            len(rhythm) *
+            ((chords[i][1][1] - chords[i][1][0]) / measure_length))
         current_rhythm = rhythm[0:len(rhythm)]
         # potential warning: is funky with small fractions, like .23 of a measure
         while measure_size > len(current_rhythm):
-            if len(current_rhythm) + len(rhythm) <= measure_size: 
+            if len(current_rhythm) + len(rhythm) <= measure_size:
                 current_rhythm += rhythm
             else:
-                current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
+                current_rhythm += current_rhythm[:int(len(rhythm) / 2) + 1]
         measure = []
         for j in range(measure_size):
             if j == 0:
-                measure.append([chords[i][0][0], current_rhythm[j], time_length])
+                measure.append(
+                    [chords[i][0][0], current_rhythm[j], time_length])
             elif meter[0] > 2 and j == 1:
-                measure.append([random.choice(chords[i][0][1:]), current_rhythm[j],
-                                                                       time_length])
-            elif i < len(chords)-1 and j == measure_size-1:
-                measure.append([choose_leading_tone(measure[-1][0], chords[i+1][0][0]),
-                                                   current_rhythm[j], time_length])
+                measure.append([
+                    random.choice(chords[i][0][1:]), current_rhythm[j],
+                    time_length
+                ])
+            elif i < len(chords) - 1 and j == measure_size - 1:
+                measure.append([
+                    choose_leading_tone(measure[-1][0], chords[i + 1][0][0]),
+                    current_rhythm[j], time_length
+                ])
             elif meter[0] % 4 == 0 and j > 1:
-                possibility = random.choice([i for i in chords[i][0]
-                                              if i not in measure])
-                measure.append([random.choice([i for i in chords[i][0]
-                                              if i not in measure]),
-                                        current_rhythm[j], time_length])
+                possibility = random.choice(
+                    [i for i in chords[i][0] if i not in measure])
+                measure.append([
+                    random.choice(
+                        [i for i in chords[i][0] if i not in measure]),
+                    current_rhythm[j], time_length
+                ])
             else:
-                measure.append([chords[i][0][0], current_rhythm[j], time_length])
+                measure.append(
+                    [chords[i][0][0], current_rhythm[j], time_length])
             time_length += Space_Values[current_rhythm[j]]
         notes += measure
     return notes
+
 
 
 def running_scale(pitches):
@@ -240,7 +274,8 @@ def generate_hand_motions(parts, meter, **args):
     if "rhythm" in args:
         beats = args["rhythm"]
         for part in parts:
-            motions[part] = generate_hand_motion(parts[part], meter, rhythm=beats)
+            motions[part] = generate_hand_motion(
+                parts[part], meter, rhythm=beats)
     else:
         if "rhythm_len" in args:
             l = args["rhythm_len"]
@@ -252,17 +287,16 @@ def generate_hand_motions(parts, meter, **args):
             inten = False
         if inten and l:
             for part in parts:
-                motions[part] = generate_hand_motion(parts[part], meter, 
-                                                     rhythm_len=l,
-                                                     intensity=inten)
+                motions[part] = generate_hand_motion(
+                    parts[part], meter, rhythm_len=l, intensity=inten)
         elif inten:
             for part in parts:
-                motions[part] = generate_hand_motion(parts[part], meter, 
-                                                         intensity=inten)
+                motions[part] = generate_hand_motion(
+                    parts[part], meter, intensity=inten)
         elif l:
             for part in parts:
-                motions[part] = generate_hand_motion(parts[part], meter,
-                                                            rhythm_len=l)
+                motions[part] = generate_hand_motion(
+                    parts[part], meter, rhythm_len=l)
         else:
             for part in parts:
                 motions[part] = generate_hand_motion(parts[part], meter)

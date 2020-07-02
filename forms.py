@@ -35,7 +35,6 @@ def sync_note_durations(notes, *starting_time):
     return result
 
 # Matching parts also syncs the notes correctly
-
 def match_parts_to_form(form, parts):
     result = []
     time_length = 0
@@ -45,7 +44,10 @@ def match_parts_to_form(form, parts):
         for j in times:
             notes = [note for note in parts[form[i]] if note[2] == j]
             if notes != []:
-                [result.append([note[0], note[1], time_length]) for note in notes]
+                [
+                    result.append([note[0], note[1], time_length])
+                    for note in notes
+                ]
                 time_length += Space_Values[notes[0][1]]
     return result
 
@@ -62,23 +64,23 @@ def match_and_alter_parts_to_form(form, parts):
         for j in times:
             notes = [note for note in parts[form[i]] if note[2] == j]
             if notes != []:
-                [subresult.append([note[0], note[1], time_length])
-                                                 for note in notes]
+                [
+                    subresult.append([note[0], note[1], time_length])
+                    for note in notes
+                ]
                 time_length += Space_Values[notes[0][1]]
         if parts[form[i]] not in introduced:
             introduced += [parts[form[i]]]
             result += subresult
-        elif i == len(form)-1:
+        elif i == len(form) - 1:
             result += subresult
         else:
-            option = sync_note_durations(alter_part(subresult),
-                                                subresult[0][2])
-            while [[[note[0], note[1]] for note in option]] \
-                                                in alterated \
-                and (subresult[-1][2] - subresult[0][2]) \
-                     - (option[-1][2] - option[0][2]) != 0:
+            option = sync_note_durations(
+                alter_part(subresult), subresult[0][2])
+            while [[[note[0], note[1]] for note in option]
+                   ] in alterated and (subresult[-1][2] - subresult[0][2]) - (
+                       option[-1][2] - option[0][2]) != 0:
                 option = alter_part(subresult)
             alterated += [[[note[0], note[1]] for note in option]]
             result += option
     return result
-

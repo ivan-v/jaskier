@@ -25,9 +25,10 @@ def generate_rhythm_measure(space_left, rhythm_pdf):
     pdf = list(rhythm_pdf.values())
     pmf = [(pdf[i] + sum(pdf[0:i])) for i in range(len(pdf))]
     while space_left > 0:
-        r = random.randint(0, 99)/100
+        r = random.randint(0, 99) / 100
         p = next(x for x in pmf if x > r)
-        note = list(rhythm_pdf.keys())[list(rhythm_pdf.values()).index(pdf[pmf.index(p)])]
+        note = list(rhythm_pdf.keys())[list(rhythm_pdf.values()).index(
+            pdf[pmf.index(p)])]
         if note == "(3 % 8)" and space_left >= 2:
             space_left -= 2
             measure.append(note)
@@ -57,20 +58,22 @@ def replace_some_quarters_with_eights(rhythm, frequency):
 def generate_rhythm(meter, measure_count, show_seperate_measures, rhythm_pdf):
     breathing_space = check_space(meter, measure_count)
     rhythm = []
-    first_measure = generate_rhythm_measure(meter[0]/(meter[1]/4), rhythm_pdf)
+    first_measure = generate_rhythm_measure(meter[0] / (meter[1] / 4),
+                                            rhythm_pdf)
     unique_measures = {tuple(first_measure)}
     if show_seperate_measures:
         first_measure = [first_measure]
     rhythm += first_measure
     measures_left = measure_count - 1
     while measures_left > 0:
-        if breathing_space and random.randint(0,2) == 0:
+        if breathing_space and random.randint(0, 2) == 0:
             if show_seperate_measures:
                 rhythm += [random.choice([list(i) for i in unique_measures])]
             else:
                 rhythm += random.choice([list(i) for i in unique_measures])
         else:
-            new_measure = generate_rhythm_measure(meter[0]/(meter[1]/4), rhythm_pdf)
+            new_measure = generate_rhythm_measure(meter[0] / (meter[1] / 4),
+                                                  rhythm_pdf)
             unique_measures.add(tuple(new_measure))
             if show_seperate_measures:
                 rhythm += [new_measure]
@@ -78,6 +81,7 @@ def generate_rhythm(meter, measure_count, show_seperate_measures, rhythm_pdf):
                 rhythm += new_measure
         measures_left -= 1
     return rhythm
+
 
 
 def merge_pitches_with_rhythm(pitches, rhythm):

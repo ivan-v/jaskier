@@ -52,13 +52,21 @@ def motion(pitch_1, pitch_2):
 
 def convert_pitches_to_dominant_key(given_pitches, base, tonic_key):
     pitches = sum(given_pitches, [])
-    fuller_key = sum(list(map(lambda x: [i + 12*x + base for i in tonic_key[1][0]], range(-3,3))), [])
-    degrees = [fuller_key.index(pitch) % len(tonic_key[1][0]) for pitch in pitches]
-    offsets = [int((pitch-base)/12) for pitch in pitches] 
+    fuller_key = sum(
+        list(
+            map(lambda x: [i + 12 * x + base for i in tonic_key[1][0]],
+                range(-3, 3))), [])
+    degrees = [
+        fuller_key.index(pitch) % len(tonic_key[1][0]) for pitch in pitches
+    ]
+    offsets = [int((pitch - base) / 12) for pitch in pitches]
     new_key = dominant_key_of_tonic(tonic_key)
-    result = [new_key[1][0][i] + 12*offsets[i] + new_key[1][1] for i in range(len(degrees))]
+    result = [
+        new_key[1][0][i] + 12 * offsets[i] + new_key[1][1]
+        for i in range(len(degrees))
+    ]
     new_pitches = [[result[i + j] for j in range(len(given_pitches[i]))]
-               for i in range(len(given_pitches))]
+                   for i in range(len(given_pitches))]
     return new_pitches
 
 def generate_ap(chords, rhythm):
@@ -157,15 +165,17 @@ def generate_pitches_for_melody(chords, chord_progression, pitch_range,
     return [sum(result, []), rhythm]
 
 
-def generate_melody(applied_key, chords, chord_progression, rhythm_pdf, backbone_len, 
-                    rhythm_repetition_in_mel, meter, pitch_range, max_step_size, fuller_mode):
-  rhythm = generate_rhythm_for_melody(chords, rhythm_pdf, backbone_len, 
-                                     rhythm_repetition_in_mel, meter)
-  rhym_and_pitches = generate_pitches_for_melody(chords, chord_progression, pitch_range,
-                                  meter, max_step_size, rhythm, applied_key, fuller_mode)
-  pitches = rhym_and_pitches[0]
-  rhythm = sum(rhym_and_pitches[1], [])
-  
-  notes = merge_pitches_with_rhythm(pitches[:len(rhythm)], rhythm)
-  return  sync_note_durations(notes)
+def generate_melody(applied_key, chords, chord_progression, rhythm_pdf,
+                    backbone_len, rhythm_repetition_in_mel, meter, pitch_range,
+                    max_step_size, fuller_mode):
+    rhythm = generate_rhythm_for_melody(chords, rhythm_pdf, backbone_len,
+                                        rhythm_repetition_in_mel, meter)
+    rhym_and_pitches = generate_pitches_for_melody(
+        chords, chord_progression, pitch_range, meter, max_step_size, rhythm,
+        applied_key, fuller_mode)
+    pitches = rhym_and_pitches[0]
+    rhythm = sum(rhym_and_pitches[1], [])
+
+    notes = merge_pitches_with_rhythm(pitches[:len(rhythm)], rhythm)
+    return sync_note_durations(notes)
 

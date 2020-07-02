@@ -3,7 +3,7 @@ import math
 from chord_progression import generate_full_chord_sequence, Special_Chords, convert_chord_names_to_over_measures, invert_chords_in_progression
 from forms import Forms, pick_random_form, match_parts_to_form, match_and_alter_parts_to_form, sync_note_durations
 from hand_motions import generate_hand_motions
-from melodic_alteration import insert_passing_tones, strip_part
+from melodic_alteration import insert_passing_tones, strip_part, infer_key_from_chords
 from midiutil import MIDIFile
 from modes_and_keys import apply_key, Starting_Pitch
 from motif_generator import generate_melody
@@ -25,10 +25,6 @@ Presets = {
     "pitch_range": 20,
 }
 
-applied_key = apply_key("Aeolian", "D")
-# print(generate_full_chord_sequence(applied_key))
-# print(sum(list(map(lambda x: [i + 12*x for i in applied_key[1][0]],
-#                              range(2,9))), []))
 
 def repeat_section(section, times):
     return sum([section for i in range(times)], [])
@@ -43,10 +39,13 @@ def generate_parts_and_chords(presets, applied_key):
             # if chord sequence already exists, make a new one
             while option in list(parts.values()):
                 option = generate_full_chord_sequence(applied_key)
-                                      # Special_Chords["8-bar blues"])
-            parts[part] = repeat_section(option[0], presets["repeat_chord_progression_in_part"])
-            progressions[part] = repeat_section(option[1], presets["repeat_chord_progression_in_part"])
+                # Special_Chords["8-bar blues"])
+            parts[part] = repeat_section(
+                option[0], presets["repeat_chord_progression_in_part"])
+            progressions[part] = repeat_section(
+                option[1], presets["repeat_chord_progression_in_part"])
     return [parts, progressions]
+
 
 
 def generate_melody_pieces(presets, parts, given_chords, progressions, applied_key):
@@ -150,19 +149,26 @@ def sort_notes_into_measures(notes, meter):
 
 
 def generate_song_from_chords(presets, given_chords, make_hand_motions):
-    chords = convert_chord_names_to_over_measures(given_chords, presets["meter"])
+    chords = convert_chord_names_to_over_measures(given_chords,
+                                                  presets["meter"])
     chords = invert_chords_in_progression(chords)
     parts = {"A": chords}
-    pieces = generate_melody_pieces(presets, parts, given_chords)
+    applied_key = infer_key_from_chords(chords)
+    # TODO: Figure out progression from given chords
+    pieces = generate_melody_pieces(presets, parts, given_chords, progressions,
+                                    applied_key)
     song = match_and_alter_parts_to_form(Forms["One-part"], pieces)
     melody = sync_note_durations(song)
-    final_note = [[melody[0][0], 'wn', melody[-1][2] + Space_Values[melody[-1][1]]]]
+    final_note = [[
+        melody[0][0], 'wn', melody[-1][2] + Space_Values[melody[-1][1]]
+    ]]
     if make_hand_motions:
         hand_motions = generate_hand_motions(parts, presets["meter"])
         hands = match_parts_to_form(Forms["One-part"], hand_motions)
         return melody + hands + final_note
     else:
         return melody + final_note
+
 
 
 def generate_n_hands(presets, n, *given_chords):
@@ -215,14 +221,16 @@ def write_to_midi(song, filename):
 
     for i in range(len(song)):
         if song[i][0] < 60:
-            volume = 93
+            volume = 92
         elif song[i][0] < 50:
-            volume = 89
+            volume = 86
         elif song[i][0] < 45:
-            volume = 85
+            volume = 83
         else:
             volume = 100
-        MyMIDI.addNote(track, channel, song[i][0], song[i][2], Space_Values[song[i][1]], volume)
+        MyMIDI.addNote(track, channel, song[i][0], song[i][2],
+                       Space_Values[song[i][1]], volume)
+
 
     with open(filename + ".mid", "wb") as output_file:
         MyMIDI.writeFile(output_file)

@@ -48,29 +48,36 @@ def generate_rhythmic_motion(length, min_chord_size, repeating_pitches):
     return result
 
 # TODO: Make more configurable in terms of where chords vs notes
-def generate_full_rhythmic_motion(rhythm, leading_tone, rhythmic_motion, chords, meter):
+def generate_full_rhythmic_motion(rhythm, leading_tone, rhythmic_motion,
+                                  chords, meter):
     result = []
     time_length = 0
-    measure_length = meter[0]/(meter[1]/4)
+    measure_length = meter[0] / (meter[1] / 4)
     for i in range(len(chords)):
         # \/ size of measure for the chord
-        measure_size = int(len(rhythm)*((chords[i][1][1]-chords[i][1][0])/measure_length))
+        measure_size = int(
+            len(rhythm) *
+            ((chords[i][1][1] - chords[i][1][0]) / measure_length))
         current_rhythm = rhythm
         # potential warning: is funky with small fractions, like .23 of a measure
         while measure_size > len(current_rhythm):
-            if len(current_rhythm) + len(rhythm) <= measure_size: 
+            if len(current_rhythm) + len(rhythm) <= measure_size:
                 current_rhythm = rhythm[0:len(rhythm)]
             else:
-                current_rhythm += current_rhythm[:int(len(rhythm)/2)+1]
+                current_rhythm += current_rhythm[:int(len(rhythm) / 2) + 1]
         for j in range(measure_size):
-            if j == measure_size-1 and i != len(chords)-1:
-                result.append([choose_leading_tone(chords[i][0][0], chords[i+1][0][0]),
-                                                        current_rhythm[j], time_length])
+            if j == measure_size - 1 and i != len(chords) - 1:
+                result.append([
+                    choose_leading_tone(chords[i][0][0], chords[i + 1][0][0]),
+                    current_rhythm[j], time_length
+                ])
             elif j + len(rhythmic_motion) > measure_size - leading_tone - 1:
-                pitch = chords[i][0][rhythmic_motion[measure_size - leading_tone - j - 1]]
+                pitch = chords[i][0][rhythmic_motion[measure_size
+                                                     - leading_tone - j - 1]]
                 result.append([pitch, current_rhythm[j], time_length])
             elif j != measure_size - 1:
-                result += [[p, current_rhythm[j], time_length] for p in chords[i][0]]
+                result += [[p, current_rhythm[j], time_length]
+                           for p in chords[i][0]]
             time_length += Space_Values[current_rhythm[j]]
     return result
 
