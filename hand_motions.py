@@ -227,8 +227,7 @@ def walking_bass(chords, meter):
     return notes
 
 
-
-def running_scale(pitches):
+def running_scale(pitches, applied_key):
     return
 
 def pick_hand_motion(chords, meter, rhythm):

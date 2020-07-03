@@ -36,9 +36,8 @@ Special_Chords = {
   "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
 }
 
-# TODO: Make some of them 7th chords:
-# https://en.wikipedia.org/wiki/Seventh_chord#/media/File:Seventh_chords_frequency.png
-def make_full_chord_progression(applied_key, *input_tonics):
+# Jazzyness is 0-4
+def make_full_chord_progression(applied_key, jazzyness, *input_tonics):
     result = []
     m = applied_key[1][0]
     m += [i + 12 for i in m]
@@ -49,7 +48,12 @@ def make_full_chord_progression(applied_key, *input_tonics):
         tonics = input_tonics[0]
     else:
         tonics = generate_chord_progression()
-    selected_chords = [[0, m[tonic + 2] - m[tonic], m[tonic + 4] - m[tonic]]
+    chosen = random.choice([[4], [4, 1], [4, 1, 6], [4, 1, 6, 3]][:jazzyness])
+    selected_chords = [[
+        0, m[tonic + 2] - m[tonic], m[tonic + 4] - m[tonic],
+        m[tonic + 6] - m[tonic]
+    ] if tonic in chosen else
+                       [0, m[tonic + 2] - m[tonic], m[tonic + 4] - m[tonic]]
                        for tonic in tonics]
     return ([[
         note + applied_key[1][0][tonics[i]] + applied_key[1][1]
@@ -79,11 +83,11 @@ def generate_pitches_from_chords(chord_progression, applied_key):
     return pitches
 
 
-def generate_full_chord_sequence(applied_key, *input_chords):
+def generate_full_chord_sequence(applied_key, jazzyness, *input_chords):
   if input_chords:
-    chords = make_full_chord_progression(applied_key, input_chords[0])
+    chords = make_full_chord_progression(applied_key, jazzyness, input_chords[0])
   else:
-    chords = make_full_chord_progression(applied_key)
+    chords = make_full_chord_progression(applied_key, jazzyness)
   return chords
 
 
@@ -178,6 +182,21 @@ def construct_chord(offset, chord_name, is_minor):
       else:
         chord.append(chord[-1] + 4)
       chord.append(chord[-1] + 3)
+    elif nums[0][0] == 13:
+      if is_minor:
+        chord.append(chord[-1] + 3)
+      elif "dim" in chord_name:
+        chord.append(chord[-1] + 2)
+      elif "maj" in chord_name:
+        chord.append(chord[-1] + 4)
+      else:
+        chord.append(chord[-1] + 3)
+      if "maj" in chord_name:
+        chord.append(chord[-1] + 3)
+      else:
+        chord.append(chord[-1] + 4)
+      # Drop the 11th due to potential conflicts
+      chord.append(chord[-1] + 5)
   for num in nums[1:]:
     entry = int(num[0]/2)
     if num[1] == "b":
@@ -224,6 +243,7 @@ def construct_chord_from_name(chord_name):
              'dim' not in chord_name
 
   return construct_chord(offset, chord_name, is_minor)
+
 
 def convert_roman_chord_names_to_sequence(mode, given_chords):
   return [construct_chord_from_roman(mode, chord) for chord in given_chords]

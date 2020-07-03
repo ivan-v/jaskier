@@ -13,8 +13,8 @@ from stems import shift_octave
 
 Presets = {
     "meter"      : (4,4),
-    "key"        : "Ionian",
-    "base"       : "B",
+    "key"        : "Aeolian",
+    "base"       : "G",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "form"       : Forms["Ballade"],
     "rhythm_repetition_in_mel" : 3,
@@ -22,6 +22,7 @@ Presets = {
     "repeat_chord_progression_in_part" : 1,
     "max_step_size" : 13,
     "pitch_range": 17,
+    "jazzyness": 2,
 }
 
 
@@ -34,10 +35,10 @@ def generate_parts_and_chords(presets, applied_key):
     progressions = {}
     for part in presets["form"]:
         if part not in parts:
-            option = generate_full_chord_sequence(applied_key)
+            option = generate_full_chord_sequence(applied_key, presets["jazzyness"])
             # if chord sequence already exists, make a new one
             while option in list(parts.values()):
-                option = generate_full_chord_sequence(applied_key)
+                option = generate_full_chord_sequence(applied_key, presets["jazzyness"])
                 # Special_Chords["8-bar blues"])
             parts[part] = repeat_section(
                 option[0], presets["repeat_chord_progression_in_part"])
