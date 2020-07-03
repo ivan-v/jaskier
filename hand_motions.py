@@ -80,10 +80,10 @@ def seesaw(chords, meter, rhythm):
     return notes
 
 
-def arpeggios(chords, meter, rhythm, random_direction, *direction):
+def arpeggios(chords, meter, rhythm, has_random_direction, is_repeated_rhythm, *direction):
     min_chord_length = min_chord_size(chords)
 
-    if not random_direction:
+    if not has_random_direction:
         if not direction:
             direction = random.choice([
                 list(range(0, min_chord_length)),
@@ -96,20 +96,32 @@ def arpeggios(chords, meter, rhythm, random_direction, *direction):
     notes = []
     time_length = 0
     for i in range(len(chords)):
-
-
-        # \/ size of measure for the chord
-        measure_size = int(
-            len(rhythm) *
-            ((chords[i][1][1] - chords[i][1][0]) / measure_length))
-        current_rhythm = rhythm[0:len(rhythm)]
-        # potential warning: is funky with small fractions, like .23 of a measure
-        while measure_size > len(current_rhythm):
-            if len(current_rhythm) + len(rhythm) <= measure_size:
-                current_rhythm += rhythm
-            else:
-                current_rhythm += current_rhythm[:int(len(rhythm) / 2) + 1]
-        if random_direction:
+        if is_repeated_rhythm:
+            # \/ size of measure for the chord
+            measure_size = int(
+                len(rhythm) *
+                ((chords[i][1][1] - chords[i][1][0]) / measure_length))
+            current_rhythm = rhythm[0:len(rhythm)]
+            # potential warning: is funky with small fractions, like .23 of a measure
+            while measure_size > len(current_rhythm):
+                if len(current_rhythm) + len(rhythm) <= measure_size:
+                    current_rhythm += rhythm
+                else:
+                    current_rhythm += current_rhythm[:int(len(rhythm) / 2) + 1]
+        else:
+            durations = [[Space_Values[duration], duration] for duration in rhythm]
+            time = 0
+            for duration in durations:
+                duration[0] += time
+                time = duration[0]
+            start = durations.index(next(filter(lambda x: x[0] >= chords[i][1][0], iter(durations))))
+            try:
+                end = durations.index(next(filter(lambda x: x[0] >= chords[i][1][1], iter(durations))))
+            except StopIteration:
+                pass
+            current_rhythm = rhythm[start:end]
+            measure_size = len(current_rhythm)
+        if has_random_direction:
             direction = random.choice(
                [list(i) for i in list(permutations(range(0, min_chord_length)))]
             )
@@ -121,7 +133,7 @@ def arpeggios(chords, meter, rhythm, random_direction, *direction):
             ])
             notes_in_direction_completed += 1
             if notes_in_direction_completed >= min_chord_length:
-                if random_direction:
+                if has_random_direction:
                     direction = random.choice(
                        [list(i) for i in list(permutations(range(0, min_chord_length)))]
                     )
@@ -221,17 +233,12 @@ def running_scale(pitches):
 
 def pick_hand_motion(chords, meter, rhythm):
     motion = random.randint(0,4)
-    # return full_chord(chords, me ter, rhythm)
-    # return walking_bass(chords, meter)
-    # return arpeggios(chords, meter, ['en', 'en', 'en', 'en', 'en', 'en', 'en', 'en'], [1, 2, 0, 1, 1, 2, 0, 1])
-    # return seesaw(chords, meter, rhythm)
-    # return octave_doubling(chords, meter, rhythm)
     if motion == 0:
         return seesaw(chords, meter, rhythm)
     elif motion == 1:
         return full_chord(chords, meter, rhythm)
     elif motion == 2:
-        return arpeggios(chords, meter, rhythm, False)
+        return arpeggios(chords, meter, rhythm, False, True)
     elif motion == 3:
         return walking_bass(chords, meter)
     else:

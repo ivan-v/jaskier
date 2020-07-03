@@ -13,8 +13,8 @@ from stems import shift_octave
 
 Presets = {
     "meter"      : (4,4),
-    "key"        : "Aeolian",
-    "base"       : "D",
+    "key"        : "Ionian",
+    "base"       : "B",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
     "form"       : Forms["Ballade"],
     "rhythm_repetition_in_mel" : 3,

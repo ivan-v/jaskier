@@ -1,6 +1,7 @@
 import random
 
-Space_Values = {"wn": 4, "hn": 2, "qn": 1, "en": .5, "(3 % 8)": 1.5, "(1 % 3)": 1.0/3.0}
+Space_Values = {"wn": 4, "hn": 2, "qn": 1, "en": .5, "(3 % 8)": 1.5, "(1 % 3)": 1.0/3.0,
+                "dhn": 3, "dqn": 1.5, "den": .75, "sn": .25, "(2 % 3)": 2.0/3.0 }
 
 # should add up to 1
 rhythm_pdf_presets = {
@@ -9,6 +10,18 @@ rhythm_pdf_presets = {
     "quarters_only": {"qn": 1},
     "ties_too": {"(3 % 8)": .35, "qn": .35, "en": .05, "hn": .2, "(3 % 4)": .05},
 }
+
+
+def two_durations_that_equal_another(duration):
+    options = sum([[
+        (a, b) for a in Space_Values
+        if Space_Values[a] + Space_Values[b] == Space_Values[duration]
+    ] for b in Space_Values], [])
+    if options == []:
+        return -1
+    else:
+        return random.choice(options)      
+
 
 # meter is a tuple (top, bottom)
 # measure_count is an integer

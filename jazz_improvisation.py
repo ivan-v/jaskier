@@ -3,69 +3,104 @@ import random
 from chord_progression import convert_chord_names_to_over_measures, invert_chords_in_progression
 from generate_music import write_to_midi
 from hand_motions import arpeggios, full_chord
-from jazz_chords import apply_jazz_progression, generate_jazz_progression
-from rhythm import generate_rhythm, Space_Values
+from jazz_chords import apply_jazz_progression, generate_jazz_progression, coltrane_progression
+from rhythm import generate_rhythm, Space_Values, two_durations_that_equal_another
 from rhythm_track import Beat_Intensity_Presets
 from stems import shift_octave
 
 # TODO: add varied beats
-def generate_melodic_continuity_rhythm(chords, meter, varied_beats):
+def generate_melodic_continuity_rhythm(chords, meter, varied_beats, swinging):
     length = chords[-1][1][1]
     num_measures = length/(meter[0]/(meter[1]/4))
     result = []
-    options = [['qn'], ['en', 'en'], [ '(1 % 3)', '(1 % 3)', '(1 % 3)']]
+    if not swinging:
+        options = [['qn'], ['en', 'en'], [ '(1 % 3)', '(1 % 3)', '(1 % 3)']]
+    else:
+        options = [["(1 % 3)", "(2 % 3)"]]
     if not varied_beats:
         single_beat = random.choice(options)
     if meter[1] == 4:
-        return single_beat*int(meter[0])
+        result = single_beat*int(meter[0]*num_measures)
     elif meter[1] == 8:
-        return single_beat*int(meter[0]*.5)
+        result = single_beat*int(meter[0]*.5*num_measures)
+    random.shuffle(result)
+    return result
 
-# TODO: move to a better place
+# TODO: move to a better place, maybe?
 def rhythm_for_full_chords(meter):
-    # result = []
-    # for i in range(len(chords)):
-    #     duration = list(Space_Values.keys())[list(Space_Values.values()).index(chords[i][1][1] - chords[i][1][0])]
-    #     result += [duration]
-    # return result
-    if meter[0] == 4 and meter[1] == 4:
+    if (meter[0] == 4 and meter[1] == 4) or (meter[0] == 8 and meter[1] == 8):
         return ['wn']
-    elif meter[0] == 2 and meter[1] == 4:
+    elif (meter[0] == 3 and meter[1] == 4) or (meter[0] == 6 and meter[1] == 8):
+        return ['dhn']
+    elif (meter[0] == 2 and meter[1] == 4) or (meter[0] == 4 and meter[1] == 8):
         return ['hn']
 
 
-def improvise_over_chord_progression(chords, chord_progression, meter):
+def make_wrong_notes(to_replace, goal):
+    wrong_notes = random.choice(
+        ['chromatic approach', 'enclosure', 'chromatic runs'])
+    r = random.choice([-1, 1])
+    durations = two_durations_that_equal_another(to_replace[1])
+    if wrong_notes == 'enclosure' and Space_Values[to_replace[1]] > .65:
+        return [[to_replace[0] + r, durations[0], to_replace[2]], [
+            to_replace[0] - r, durations[1],
+            to_replace[2] + Space_Values[durations[0]]
+        ]]
+    elif wrong_notes == 'chromatic runs' and Space_Values[to_replace[1]] > .65:
+        return [[to_replace[0] + r, durations[0], to_replace[2]], [
+            to_replace[0] + 2*r, durations[1],
+            to_replace[2] + Space_Values[durations[0]]
+        ]]
+    else:
+        return [to_replace[0] + r, to_replace[1], to_replace[2]]
+
+
+def add_tension(chords, notes):
+    for i in range(len(chords)-1):
+        # find the last note for every chord
+        last_note = next(
+            filter(lambda x: x[2] + Space_Values[x[1]] >= chords[i][1][1] - .005,
+                   iter(notes)))
+        to_insert = make_wrong_notes(last_note, chords[i+1][0][0])
+        if type(to_insert[0]) == int:
+            notes[notes.index(last_note)] = to_insert
+        else:
+            notes[notes.index(last_note)] = to_insert[0]
+            for i in range(len(to_insert[1:])):
+                notes.insert(notes.index(to_insert[0])+i, to_insert[1+i])
+        # assumes root of the chord is the first element
+    return notes
+
+
+def improvise_over_chord_progression(chords, meter, swinging):
     # phrasing should be param for rhythm
     # phrasing = random.choice(["melodic_continuity", "phrases"])
-    rhythm = generate_melodic_continuity_rhythm(chords, meter, False)
+    rhythm = generate_melodic_continuity_rhythm(chords, meter, False, swinging)
 
     # right_notes = random.choice(['arpeggios', 'major_scale', 'blues scale'])
     right_notes = 'arpeggios'
-    wrong_notes = random.choice(['chromatic approach', 'enclosure', 'chromatic runs'])
     
     if right_notes == 'arpeggios':
-        notes = arpeggios(chords, meter, rhythm, True)
+        notes = arpeggios(chords, meter, rhythm, True, False)
     rhy = rhythm_for_full_chords(meter)
     full_chords = shift_octave(full_chord(invert_chords_in_progression(chords), meter, rhy), -2)
+    better_notes = add_tension(chords, notes)
 
     return notes + full_chords
 
-# x = generate_jazz_progression()
-# a = apply_jazz_progression(x, 'B')
-# b = convert_chord_names_to_over_measures(a, (4,4))
-# print(x)
-# print(invert_chords_in_progression(b))
 
-def generate_jazz_chords_and_improv(key_note, meter):
-    progression = generate_jazz_progression()
-    chord_names = apply_jazz_progression(progression, key_note)
-    chords = convert_chord_names_to_over_measures(chord_names, meter)
-    return improvise_over_chord_progression(chords, progression, meter)
+def generate_jazz_chords_and_improv(key_note, meter, measures_per_chord, swinging):
+    # progression = generate_jazz_progression()
+    chord_names = coltrane_progression(20, key_note)
+    # chord_names = apply_jazz_progression(progression, key_note)
+    chords_names = [[name, measures_per_chord] for name in chord_names]
+    chords = convert_chord_names_to_over_measures(chords_names, meter)
+    return improvise_over_chord_progression(chords, meter, swinging)
 
 # progression = ['I', 'vii_dim', 'ii6', 'V7', 'vii_halfdim', 'i']
 # test_chords = [([71, 75, 78], (0, 4.0)), ([70, 73, 76, 78], (4.0, 8.0)), ([61, 64, 68, 70], (8.0, 12.0)), ([78, 82, 85, 88], (12.0, 16.0)), ([70, 73, 76, 80], (16.0, 20.0)), ([71, 74, 78], (20.0, 24.0))]
 # t = improvise_over_chord_progression(test_chords, progression, (4,4))
-t = generate_jazz_chords_and_improv('G', (4,4))
-write_to_midi(t, "jazz_improv", 100)
+t = generate_jazz_chords_and_improv('Bb', (4,4), 2, True)
+write_to_midi(t, "jazz_improv", 140)
 
 
