@@ -48,6 +48,12 @@ Starting_Pitch = {
   "Bs": 60,
 }
 
+def fuller_mode(applied_key):
+    return sum(
+        list(
+            map(lambda x: [i + 12 * x + applied_key[1][1] for i in applied_key[1][0]],
+                range(-3, 3))), [])
+
 
 def dominant_key_of_tonic(tonic_key):
   new_root = tonic_key[1][1] + tonic_key[1][0][4]

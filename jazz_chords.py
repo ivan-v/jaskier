@@ -46,7 +46,7 @@ def apply_jazz_progression(progression, *keys):
 		for Set in All_Sets:
 			for subset in Set:
 				if key == subset["I"]:
-					result += [subset[roman] for roman in progression]
+					result += [[key, subset[roman]] for roman in progression]
 	return result
 
 
@@ -67,7 +67,7 @@ def populate_blues_tabs_with_jazz_chords(meter, tab, *rhythm):
 	else:
 		rhythm = rhythm[0]
 	keys = find_key_from_fifths(tab)
-	chord_names = apply_jazz_progression(generate_jazz_progression(), keys)
+	chord_names = [i[1] for i in apply_jazz_progression(generate_jazz_progression(), keys)]
 	chords = convert_chord_names_to_over_measures(chord_names, meter)
 	better_chords = invert_chords_in_progression(chords)
 	notes = full_chord(better_chords, meter, rhythm)
@@ -110,7 +110,7 @@ def coltrane_progression(length, *first_note):
 		for Set in All_Sets:
 			for subset in Set:
 				if key == subset["I"]:
-					Steps[key] = [subset["ii6"][:-1]+"7", subset["V7"], subset["I"]+"maj7"]
+					Steps[key] = [[key, subset["ii6"][:-1]+"7"], [key, subset["V7"]], [key, subset["I"]+"maj7"]]
 					break
 	result = [[Steps[steps[0]][2]]]
 	current_index = 0
@@ -145,7 +145,8 @@ def make_coltrane_progression(meter, length, *first_note):
 		progression = coltrane_progression(length, first_note[0])
 	else:
 		progression = coltrane_progression(length)
-	chords = convert_chord_names_to_over_measures(progression, meter)
+	chord_names = [i[1] for i in progression]
+	chords = convert_chord_names_to_over_measures(chord_names, meter)
 	better_chords = invert_chords_in_progression(chords)
 	rhythm = generate_rhythm(meter, 1, False, Beat_Intensity_Presets["4"])
 	notes = full_chord(better_chords, meter, rhythm)

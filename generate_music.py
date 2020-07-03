@@ -5,7 +5,7 @@ from forms import Forms, pick_random_form, match_parts_to_form, match_and_alter_
 from hand_motions import generate_hand_motions
 from melodic_alteration import insert_passing_tones, strip_part, infer_key_from_chords
 from midiutil import MIDIFile
-from modes_and_keys import apply_key, Starting_Pitch
+from modes_and_keys import apply_key, Starting_Pitch, fuller_mode
 from motif_generator import generate_melody
 from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_presets, replace_some_quarters_with_eights, Space_Values
 from stems import shift_octave
@@ -53,10 +53,7 @@ def generate_melody_pieces(presets, parts, given_chords, progressions, applied_k
     for part in parts:
         chords = reset_chord_times(parts[part], presets["meter"])
         base = applied_key[1][1]
-        fuller = sum(
-                    list(
-                        map(lambda x: [i + 12 * x + base for i in applied_key[1][0]],
-                            range(-3, 3))), [])
+        fuller = fuller_mode(applied_key)
         melody = generate_melody(
             applied_key, chords, progressions[part], presets["rhythm_pdf"], 2,
             presets["rhythm_repetition_in_mel"], presets["meter"],

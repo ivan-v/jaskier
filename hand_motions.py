@@ -1,5 +1,7 @@
 import random
 
+from modes_and_keys import fuller_mode
+from motif_generator import generate_ap
 from rhythm import Space_Values
 from rhythm_track import generate_rhythmic_beat, generate_rhythmic_motion
 from stems import choose_leading_tone, shift_octave
@@ -227,8 +229,51 @@ def walking_bass(chords, meter):
     return notes
 
 
-def running_scale(pitches, applied_key):
-    return
+def running_scale(chords, meter, rhythm, pitch_range, applied_key,
+                  is_repeated_rhythm, *keys):
+    if is_repeated_rhythm:
+        rhythm *= len(chords)
+    fuller = fuller_mode(applied_key)
+    if keys:
+        ap = generate_ap(chords, rhythm, fuller, pitch_range, applied_key[1][1], keys[0])
+    else:
+        ap = generate_ap(chords, rhythm, fuller, pitch_range, applied_key[1][1])
+    direction = random.choice([-1, 1])
+    direction_progress = 0
+    direction_length = random.randint(1, 10)
+    notes = []
+    time_length = 0
+    for i in range(len(rhythm)):
+        if notes == []:
+            notes.append([chords[0][0][0], rhythm[i], time_length])
+        else:
+            options = [
+                j for j in ap[i]
+                if abs(j - notes[-1][0]) < 18 and
+                   j != notes[-1][0]  and
+                   (j - notes[-1][0]) * direction >= 0
+            ]
+            if options == []:
+                direction *= -1
+                direction_progress = 0
+                direction_length = random.randint(1, 10)
+                options = [
+                    j for j in ap[i]
+                    if abs(j - notes[-1][0]) < 18 and
+                       j != notes[-1][0] and
+                       (j - notes[-1][0]) * direction >= 0
+                ]
+            selected = random.choice(options)
+            notes.append([selected, rhythm[i], time_length])
+        direction_progress += 1
+        # switch directions
+        if direction_progress > direction_length:
+            direction *= -1
+            direction_progress = 0
+            direction_length = random.randint(1, 10)
+        time_length += Space_Values[rhythm[i]]
+
+    return notes
 
 def pick_hand_motion(chords, meter, rhythm):
     motion = random.randint(0,4)

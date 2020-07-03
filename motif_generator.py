@@ -3,7 +3,7 @@ import random
 from chord_progression import available_pitches_in_chords
 from rhythm import generate_rhythm, replace_some_quarters_with_eights, merge_pitches_with_rhythm, rhythm_pdf_presets, Space_Values
 # from modes_and_keys import apply_key
-from modes_and_keys import apply_key, dominant_key_of_tonic
+from modes_and_keys import apply_key, dominant_key_of_tonic, fuller_mode
 from forms import sync_note_durations
 
 
@@ -52,10 +52,7 @@ def motion(pitch_1, pitch_2):
 
 def convert_pitches_to_dominant_key(given_pitches, base, tonic_key):
     pitches = sum(given_pitches, [])
-    fuller_key = sum(
-        list(
-            map(lambda x: [i + 12 * x + base for i in tonic_key[1][0]],
-                range(-3, 3))), [])
+    fuller_key = fuller_mode(tonic_key)
     degrees = [
         fuller_key.index(pitch) % len(tonic_key[1][0]) for pitch in pitches
     ]
@@ -69,7 +66,7 @@ def convert_pitches_to_dominant_key(given_pitches, base, tonic_key):
                    for i in range(len(given_pitches))]
     return new_pitches
 
-def generate_ap(chords, rhythm, fuller_mode, pitch_range, base):
+def generate_ap(chords, rhythm, fuller, pitch_range, base, *keys):
     chords_without_duration = [chord[0] for chord in chords]
     av = [sum(chord, []) for chord
           in available_pitches_in_chords(chords_without_duration)]
@@ -79,17 +76,35 @@ def generate_ap(chords, rhythm, fuller_mode, pitch_range, base):
     durations = list(av_with_duration.keys())
     ap = []
     time_length = 0
-    for i in range(len(rhythm)):
-        for j in range(len(rhythm[i])):
-            closest = max([i for i in durations if i <= time_length])
+    key_per_pitch = []
+    scale = random.choice(["Blues", "Ionian"])
+    if type(rhythm[0]) == list:
+        for i in range(len(rhythm)):
+            for j in range(len(rhythm[i])):
+                closest = max([i for i in durations if i <= time_length])
+                if keys:
+                    our_chord = [chord for chord in chords if chord[1][0] == closest][0]
+                    key_per_pitch.append(keys[0][chords.index(our_chord)])
+                ap.append(av_with_duration[closest])
+                time_length += Space_Values[rhythm[i][j]]
+    else:
+        for i in range(len(rhythm)):
+            closest = max([j for j in durations if j <= time_length])
+            if keys:
+                our_chord = [chord for chord in chords if chord[1][0] == closest][0]
+                key_per_pitch.append(keys[0][chords.index(our_chord)])
             ap.append(av_with_duration[closest])
-            time_length += Space_Values[rhythm[i][j]] 
+            time_length += Space_Values[rhythm[i]]
     for i in range(len(ap)):
         # Give a weighed preference towards pitches in the chord
         # (as compared to the scale)
         ap[i] = [val for val in ap[i] for _ in (0, 1)]
         ap[i] = [val for val in ap[i] for _ in (0, 1)]
-        ap[i] += fuller_mode
+        if keys:
+            mode = apply_key(scale, key_per_pitch[i])
+            ap[i] += fuller_mode(mode)
+        else:
+            ap[i] += fuller
     # Make the pitches within the pitch_range
     ap = [[ap[i][j] for j in range(len(ap[i])) if pitch_range/2 > abs(ap[i][j] - base)]
           for i in range(len(ap))] 
@@ -98,9 +113,9 @@ def generate_ap(chords, rhythm, fuller_mode, pitch_range, base):
 
 # eventual FIX we assume base is lowest pitch of the first chord
 def generate_pitches_for_melody(chords, chord_progression, pitch_range,
-                                meter, max_step_size, rhythm, applied_key, fuller_mode):
+                                meter, max_step_size, rhythm, applied_key, fuller):
     base = applied_key[1][1]
-    ap = generate_ap(chords, rhythm, fuller_mode, pitch_range, base)
+    ap = generate_ap(chords, rhythm, fuller, pitch_range, base)
 
     result = []
     expected_motion = random.choice(["conjunct", "disjunct"])
@@ -175,12 +190,12 @@ def generate_pitches_for_melody(chords, chord_progression, pitch_range,
 
 def generate_melody(applied_key, chords, chord_progression, rhythm_pdf,
                     backbone_len, rhythm_repetition_in_mel, meter, pitch_range,
-                    max_step_size, fuller_mode):
+                    max_step_size, fuller):
     rhythm = generate_rhythm_for_melody(chords, rhythm_pdf, backbone_len,
                                         rhythm_repetition_in_mel, meter)
     rhym_and_pitches = generate_pitches_for_melody(
         chords, chord_progression, pitch_range, meter, max_step_size, rhythm,
-        applied_key, fuller_mode)
+        applied_key, fuller)
     pitches = rhym_and_pitches[0]
     rhythm = sum(rhym_and_pitches[1], [])
 

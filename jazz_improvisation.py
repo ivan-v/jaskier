@@ -2,8 +2,9 @@ import random
 
 from chord_progression import convert_chord_names_to_over_measures, invert_chords_in_progression
 from generate_music import write_to_midi
-from hand_motions import arpeggios, full_chord
+from hand_motions import arpeggios, full_chord, running_scale
 from jazz_chords import apply_jazz_progression, generate_jazz_progression, coltrane_progression
+from melodic_alteration import infer_key_from_chords
 from rhythm import generate_rhythm, Space_Values, two_durations_that_equal_another
 from rhythm_track import Beat_Intensity_Presets
 from stems import shift_octave
@@ -72,35 +73,42 @@ def add_tension(chords, notes):
     return notes
 
 
-def improvise_over_chord_progression(chords, meter, swinging):
+def improvise_over_chord_progression(chords, keys, meter, pitch_range,
+                                     swinging):
     # phrasing should be param for rhythm
     # phrasing = random.choice(["melodic_continuity", "phrases"])
     rhythm = generate_melodic_continuity_rhythm(chords, meter, False, swinging)
 
     # right_notes = random.choice(['arpeggios', 'major_scale', 'blues scale'])
-    right_notes = 'arpeggios'
-    
+    right_notes = 'major_scale'  #'arpeggios'
+
     if right_notes == 'arpeggios':
         notes = arpeggios(chords, meter, rhythm, True, False)
+    elif right_notes == 'major_scale':
+        notes = running_scale(chords, meter, rhythm, pitch_range,
+                              infer_key_from_chords(chords), False, keys)
     rhy = rhythm_for_full_chords(meter)
-    full_chords = shift_octave(full_chord(invert_chords_in_progression(chords), meter, rhy), -2)
+    full_chords = shift_octave(
+        full_chord(invert_chords_in_progression(chords), meter, rhy), -2)
     better_notes = add_tension(chords, notes)
+    return notes# + full_chords
 
-    return notes + full_chords
-
-
-def generate_jazz_chords_and_improv(key_note, meter, measures_per_chord, swinging):
+def generate_jazz_chords_and_improv(key_note, meter, measures_per_chord,
+                                    pitch_range, swinging):
     # progression = generate_jazz_progression()
-    chord_names = coltrane_progression(20, key_note)
-    # chord_names = apply_jazz_progression(progression, key_note)
+    chords_and_keys = coltrane_progression(20, key_note)
+    # chords_and_keys = apply_jazz_progression(progression, key_note)
+    keys = [i[0] for i in chords_and_keys]
+    chord_names = [i[1] for i in chords_and_keys]
     chords_names = [[name, measures_per_chord] for name in chord_names]
     chords = convert_chord_names_to_over_measures(chords_names, meter)
-    return improvise_over_chord_progression(chords, meter, swinging)
+    return improvise_over_chord_progression(chords, keys, meter, pitch_range,
+                                            swinging)
 
 # progression = ['I', 'vii_dim', 'ii6', 'V7', 'vii_halfdim', 'i']
 # test_chords = [([71, 75, 78], (0, 4.0)), ([70, 73, 76, 78], (4.0, 8.0)), ([61, 64, 68, 70], (8.0, 12.0)), ([78, 82, 85, 88], (12.0, 16.0)), ([70, 73, 76, 80], (16.0, 20.0)), ([71, 74, 78], (20.0, 24.0))]
 # t = improvise_over_chord_progression(test_chords, progression, (4,4))
-t = generate_jazz_chords_and_improv('Bb', (4,4), 2, True)
+t = generate_jazz_chords_and_improv('Bb', (4,4), 2, 20, True)
 write_to_midi(t, "jazz_improv", 140)
 
 

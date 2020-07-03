@@ -1,7 +1,7 @@
 import random
 
 from chord_progression import available_pitches_in_full_chord
-from modes_and_keys import apply_key, Modes, Starting_Pitch, make_key
+from modes_and_keys import apply_key, Modes, Starting_Pitch, make_key, fuller_mode
 from rhythm import merge_pitches_with_rhythm, Space_Values
 from statistics import stdev # for getting passing tones smoother in duration
 
@@ -14,11 +14,6 @@ def strip_part(part):
         rhythm.append(note[1])
     return (melody, rhythm)
 
-
-def infer_key_from_chords(chords):
-    pitches = sum([[p for p in chord[0]] for chord in chords], [])
-    return make_key(infer_key(pitches))
-
 def infer_key(pitches):
     possibilities = [[apply_key(mode, pitch) for mode in Modes]
                                              for pitch in Starting_Pitch]
@@ -27,18 +22,18 @@ def infer_key(pitches):
     for key in possibilities:
         mode = key[1][0]
         base = key[1][1]
-        fuller_mode = [
-                j + base
-                for j in sum(
-                    list(map(lambda x: [i + 12 * x for i in mode], range(-3, 2))), [])
-            ]
-
+        fuller = fuller_mode(key)
         score = 0
         for pitch in pitches:
-            if pitch in fuller_mode:
+            if pitch in fuller:
                 score += 1
         probabilities[key[0]] = score
     return max(probabilities, key=probabilities.get)
+
+def infer_key_from_chords(chords):
+    pitches = sum([[p for p in chord[0]] for chord in chords], [])
+    return make_key(infer_key(pitches))
+
 # infer_key()
 
 def find_bridge(start, goal, length, fuller_mode):

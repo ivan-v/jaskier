@@ -1,6 +1,6 @@
 import random
 
-from modes_and_keys import apply_key, Starting_Pitch 
+from modes_and_keys import apply_key, Starting_Pitch, fuller_mode
 from rhythm import generate_rhythm, merge_pitches_with_rhythm
 
 def grow_chord_progression(progression):
@@ -63,21 +63,18 @@ def make_full_chord_progression(applied_key, jazzyness, *input_tonics):
 
 def generate_pitches_from_chords(chord_progression, applied_key):
 
-    fuller_mode = sum(
-        list(
-            map(lambda x: [i + 12 * x for i in applied_key[1][0]], range(
-                -2, 2))), [])
+    fuller = fuller_mode(applied_key)
     pitches = []
 
     for tonic in chord_progression:
         if type(tonic) is list:
-            chord = [(fuller_mode[int(len(fuller_mode) / 2) + tonic[0]] +
+            chord = [(fuller[int(len(fuller) / 2) + tonic[0]] +
                       applied_key[1][1])]
             for note in tonic[1:]:
                 chord.append(note + chord[0])
             pitches.append(chord)
         else:
-            pitches.append(fuller_mode[int(len(fuller_mode) / 2)
+            pitches.append(fuller[int(len(fuller) / 2)
                                        + tonic] + applied_key[1][1])
 
     return pitches
