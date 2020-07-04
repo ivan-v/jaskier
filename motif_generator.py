@@ -85,6 +85,9 @@ def generate_ap(chords, rhythm, fuller, pitch_range, base, *keys, **args):
     if type(rhythm[0]) == list:
         for i in range(len(rhythm)):
             for j in range(len(rhythm[i])):
+                # print(durations, time_length)
+                # TODO FIX: `ValueError: max() arg is an empty sequence` from 
+                # there being no durations smaller or equal to time_length 
                 closest = max([i for i in durations if i <= time_length])
                 if keys:
                     our_chord = [chord for chord in chords if chord[1][0] == closest][0]

@@ -2,6 +2,7 @@ import random
 
 from modes_and_keys import fuller_mode
 from motif_generator import generate_ap
+from melodic_alteration import infer_key_from_chords
 from rhythm import Space_Values
 from rhythm_track import generate_rhythmic_beat, generate_rhythmic_motion
 from stems import choose_leading_tone, shift_octave
@@ -278,7 +279,8 @@ def running_scales(chords, meter, rhythm, pitch_range, applied_key,
     return notes
 
 def pick_hand_motion(chords, meter, rhythm):
-    motion = random.randint(0,4)
+    # TODO: When generate_ap in running_scales is fixed, make `random.randint(0,5)`.
+    motion = random.randint(0,5)
     if motion == 0:
         return seesaw(chords, meter, rhythm)
     elif motion == 1:
@@ -287,6 +289,10 @@ def pick_hand_motion(chords, meter, rhythm):
         return arpeggios(chords, meter, rhythm, False, True)
     elif motion == 3:
         return walking_bass(chords, meter)
+    elif motion == 5:
+        applied_key = infer_key_from_chords(chords)
+        return running_scales(chords, meter, rhythm, 18, applied_key,
+                  True, applied_key[0].split()[1])
     else:
         return octave_doubling(chords, meter, rhythm)
 
