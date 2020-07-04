@@ -128,7 +128,8 @@ def generate_jazz_chords_and_improv(key_note, meter, measures_per_chord,
 # progression = ['I', 'vii_dim', 'ii6', 'V7', 'vii_halfdim', 'i']
 # test_chords = [([71, 75, 78], (0, 4.0)), ([70, 73, 76, 78], (4.0, 8.0)), ([61, 64, 68, 70], (8.0, 12.0)), ([78, 82, 85, 88], (12.0, 16.0)), ([70, 73, 76, 80], (16.0, 20.0)), ([71, 74, 78], (20.0, 24.0))]
 # t = improvise_over_chord_progression(test_chords, progression, (4,4))
-t = generate_jazz_chords_and_improv('Bb', (4,4), 2, 20, True, True)
-write_to_midi(t, "jazz_improv", 140)
+def test():
+    t = generate_jazz_chords_and_improv('Bb', (4,4), 2, 20, True, True)
+    write_to_midi(t, "jazz_improv", 140)
 
 
