@@ -20,7 +20,7 @@ from jazz_improvisation import test
 # called `app` in `main.py`.
 app = Flask(__name__)
 
-app.config["CLIENT_DOWNLOADS"] = "/Users/ivan/Downloads/python-docs-samples/appengine/standard_python37/hello_world/"
+app.config["CLIENT_DOWNLOADS"] = "/tmp/"
 
 
 @app.route('/')
