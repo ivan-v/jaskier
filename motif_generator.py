@@ -66,7 +66,7 @@ def convert_pitches_to_dominant_key(given_pitches, base, tonic_key):
                    for i in range(len(given_pitches))]
     return new_pitches
 
-def generate_ap(chords, rhythm, fuller, pitch_range, base, *keys):
+def generate_ap(chords, rhythm, fuller, pitch_range, base, *keys, **args):
     chords_without_duration = [chord[0] for chord in chords]
     av = [sum(chord, []) for chord
           in available_pitches_in_chords(chords_without_duration)]
@@ -77,7 +77,11 @@ def generate_ap(chords, rhythm, fuller, pitch_range, base, *keys):
     ap = []
     time_length = 0
     key_per_pitch = []
-    scale = random.choice(["Blues", "Ionian"])
+    # Select starting scale
+    if "scales" in args:
+        scale = random.choice(args["scales"])
+        scale_progress = 0
+        scale_length = random.randint(8, 35)
     if type(rhythm[0]) == list:
         for i in range(len(rhythm)):
             for j in range(len(rhythm[i])):
@@ -103,6 +107,10 @@ def generate_ap(chords, rhythm, fuller, pitch_range, base, *keys):
         if keys:
             mode = apply_key(scale, key_per_pitch[i])
             ap[i] += fuller_mode(mode)
+            if "scales" in args and scale_progress > scale_length:
+                scale_length = random.randint(8, 25)
+                scale = random.choice(args["scales"])
+                scale_progress = 0
         else:
             ap[i] += fuller
     # Make the pitches within the pitch_range

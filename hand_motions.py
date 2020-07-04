@@ -229,15 +229,17 @@ def walking_bass(chords, meter):
     return notes
 
 
-def running_scale(chords, meter, rhythm, pitch_range, applied_key,
-                  is_repeated_rhythm, *keys):
+def running_scales(chords, meter, rhythm, pitch_range, applied_key,
+                  is_repeated_rhythm, scales, *keys):
     if is_repeated_rhythm:
         rhythm *= len(chords)
     fuller = fuller_mode(applied_key)
     if keys:
-        ap = generate_ap(chords, rhythm, fuller, pitch_range, applied_key[1][1], keys[0])
+        ap = generate_ap(chords, rhythm, fuller, pitch_range,
+                         applied_key[1][1], keys[0], scales=scales)
     else:
-        ap = generate_ap(chords, rhythm, fuller, pitch_range, applied_key[1][1])
+        ap = generate_ap(chords, rhythm, fuller,
+                         pitch_range, applied_key[1][1], scales=scales)
     direction = random.choice([-1, 1])
     direction_progress = 0
     direction_length = random.randint(1, 10)
