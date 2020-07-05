@@ -232,7 +232,7 @@ def write_to_midi(song, filename, *tempo):
                        Space_Values[song[i][1]], volume)
 
 
-    with open(filename + ".mid", "wb") as output_file:
+    with open("/tmp/" + filename + ".mid", "wb") as output_file:
         MyMIDI.writeFile(output_file)
 
 
