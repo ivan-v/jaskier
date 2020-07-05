@@ -280,7 +280,7 @@ def running_scales(chords, meter, rhythm, pitch_range, applied_key,
 
 def pick_hand_motion(chords, meter, rhythm):
     # TODO: When generate_ap in running_scales is fixed, make `random.randint(0,5)`.
-    motion = random.randint(0,5)
+    motion = random.randint(0,4)
     if motion == 0:
         return seesaw(chords, meter, rhythm)
     elif motion == 1:
