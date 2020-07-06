@@ -25,10 +25,10 @@ app.config["CLIENT_DOWNLOADS"] = "/tmp/"
 
 @app.route('/')
 def hello():
-    """Return a friendly HTTP greeting."""
     test()
-    return send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="jazz_improv.mid")
-    # return 'Hello World! -Ivan'
+    res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="jazz_improv.mid")
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    return res
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
