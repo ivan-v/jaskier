@@ -153,7 +153,7 @@ def make_coltrane_progression(meter, length, *first_note):
 	return notes
 
 
-notes = make_coltrane_progression((3,4), 20, "Bb")
+# notes = make_coltrane_progression((3,4), 20, "Bb")
 
 # TODO: make generate_blues_keys
 

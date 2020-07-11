@@ -23,6 +23,7 @@ Presets = {
     "max_step_size" : 13,
     "pitch_range": 17,
     "jazzyness": 2,
+    "num_hands": 1,
 }
 
 
@@ -95,7 +96,7 @@ def reset_chord_times(chords, meter):
     return result
 
 
-def generate_song_and_chords(presets, make_hand_motions):
+def generate_song_and_chords(presets):
     
     applied_key = apply_key(presets["key"], presets["base"])
     parts_and_progressions = generate_parts_and_chords(presets, applied_key)
@@ -109,13 +110,38 @@ def generate_song_and_chords(presets, make_hand_motions):
     pieces = generate_melody_pieces(presets, parts, chords, progressions, applied_key)
     melody = match_and_alter_parts_to_form(presets["form"], pieces)
     final_note = [[melody[0][0], 'wn', melody[-1][2] + Space_Values[melody[-1][1]]]]
-    if make_hand_motions:
+    if presets["num_hands"] > 0:
+        hands = []
+        hand_motions = []
         for part in parts:
             for i in range(presets["repetitions_in_part"]):
                 if i < presets["repetitions_in_part"]-1:
                     parts[part] += parts[part]
-        hand_motions = generate_hand_motions(parts, presets["meter"])
-        hands = match_parts_to_form(presets["form"], hand_motions)
+
+            chords = compute_chord_times(parts, presets["form"], presets["meter"])
+            
+            for i in range(presets["num_hands"]):
+                hand_motion = generate_hand_motions(parts, presets["meter"])
+                while hand_motion in hand_motions:
+                    hand_motion = generate_hand_motions(parts, presets["meter"])
+                hand_motions.append(hand_motion)
+                # assuming max num of simultaneous hands = 6
+                if i == 0:
+                    shift = 2
+                elif i == 1:
+                    shift = 0
+                elif i == 2:
+                    shift = 3
+                elif i == 3:
+                    shift = 1
+                elif i == 4:
+                    shift = 4
+                else:
+                    shift = -1
+                for part in hand_motion:
+                    hand_motion[part] = shift_octave(hand_motion[part], shift)
+                hands += match_parts_to_form(form, hand_motion)
+
         # no hand motion for the first time a melody is played in the piece
         for i in range(len(hands)):
             index = int(len(pieces[presets["form"][0]])/presets["repetitions_in_part"])
@@ -205,7 +231,7 @@ def generate_n_hands(presets, n, *given_chords):
     return hands
 
 # For now, "song" format assumes [note1, note2, note3, ...]
-def write_to_midi(song, filename, *tempo):
+def write_to_midi(song, filename, instrument, *tempo):
     track    = 0
     channel  = 0
     time     = 0   # In beats
@@ -230,7 +256,8 @@ def write_to_midi(song, filename, *tempo):
             volume = 100
         MyMIDI.addNote(track, channel, song[i][0], song[i][2],
                        Space_Values[song[i][1]], volume)
-
+    
+    MyMIDI.addProgramChange(0, 0, 0, instrument)
 
     with open("/tmp/" + filename + ".mid", "wb") as output_file:
         MyMIDI.writeFile(output_file)
@@ -262,8 +289,8 @@ chords = ['Am', 'G', 'Fmaj7', 'Em',
 
 # All of these work \/
 
-p = generate_song_and_chords(Presets, True)
+p = generate_song_and_chords(Presets)
 # p = generate_n_hands(Presets, 2)
 # p = generate_song_from_chords(Presets, chords, True)
-write_to_midi(p, "song") 
+write_to_midi(p, "song", 0) 
 

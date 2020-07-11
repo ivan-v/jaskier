@@ -130,6 +130,5 @@ def generate_jazz_chords_and_improv(key_note, meter, measures_per_chord,
 # t = improvise_over_chord_progression(test_chords, progression, (4,4))
 def test():
     t = generate_jazz_chords_and_improv('Bb', (4,4), 2, 20, True, True)
-    write_to_midi(t, "jazz_improv", 140)
-
+    write_to_midi(t, "jazz_improv", 0, 140)
 
