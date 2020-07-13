@@ -48,7 +48,10 @@ def make_full_chord_progression(applied_key, jazzyness, *input_tonics):
         tonics = input_tonics[0]
     else:
         tonics = generate_chord_progression()
-    chosen = random.choice([[4], [4, 1], [4, 1, 6], [4, 1, 6, 3]][:jazzyness])
+    if jazzyness > 0:
+        chosen = random.choice([[4], [4, 1], [4, 1, 6], [4, 1, 6, 3]][:jazzyness])
+    else:
+      chosen = []
     selected_chords = [[
         0, m[tonic + 2] - m[tonic], m[tonic + 4] - m[tonic],
         m[tonic + 6] - m[tonic]

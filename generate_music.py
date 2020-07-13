@@ -11,12 +11,12 @@ from rhythm import generate_rhythm, merge_pitches_with_rhythm, rhythm_pdf_preset
 from stems import shift_octave
 
 
-Presets = {
+Test_Presets = {
     "meter"      : (4,4),
     "key"        : "Aeolian",
     "base"       : "G",
     "rhythm_pdf" : rhythm_pdf_presets["default"],
-    "form"       : Forms["Ballade"],
+    "form"       : Forms["Ballad #2"],
     "rhythm_repetition_in_mel" : 3,
     "repetitions_in_part" : 2,
     "repeat_chord_progression_in_part" : 1,
@@ -28,7 +28,7 @@ Presets = {
 
 
 def repeat_section(section, times):
-    return sum([section for i in range(times)], [])
+    return sum([section for i in range(times+1)], [])
  
 
 def generate_parts_and_chords(presets, applied_key):
@@ -301,8 +301,8 @@ chords = ['Am', 'G', 'Fmaj7', 'Em',
 
 # All of these work \/
 
-p = generate_song_and_chords(Presets)
+# p = generate_song_and_chords(Presets)
 # p = generate_n_hands(Presets, 2)
 # p = generate_song_from_chords(Presets, chords, True)
-write_to_midi(p, "song", 0) 
+# write_to_midi(p, "song", 0) 
 

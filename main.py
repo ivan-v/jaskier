@@ -14,8 +14,9 @@
 
 import os
 # [START gae_python37_app]
-from flask import Flask, send_from_directory
+from flask import Flask, request, send_from_directory
 from jazz_improvisation import test
+from handle_input import generate_song
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
 app = Flask(__name__)
@@ -29,6 +30,60 @@ def hello():
     res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="jazz_improv.mid")
     res.headers['Access-Control-Allow-Origin'] = '*'
     return res
+
+@app.route('/song')
+def song():
+    res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="song.mid")
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    return res
+
+
+@app.route('/song_gen')
+def song_gen():
+    
+    key = request.args.get('key')
+    meter = request.args.get('meter')
+    scale = request.args.get('scale')
+    rhythm_intensity = request.args.get('rhythm_pdf')
+    form = request.args.get('form')
+    rhythm_repetition_in_mel = request.args.get('rhythm_repetition_in_mel') 
+    repetitions_in_part = request.args.get('repetitions_in_part')
+    repeat_chord_progression_in_part = request.args.get('repeat_chord_progression_in_part')
+    max_step_size = request.args.get('max_step_size')
+    pitch_range_mel = request.args.get('pitch_range')
+    jazziness = request.args.get('jazziness')
+    number_of_hand_motions = request.args.get('num_hands')
+
+    tempo = int(request.args.get('tempo'))
+
+    if scale == "Major (Ionian)":
+        scale = "Ionian"
+    elif scale == "Minor (Aeolian)":
+        scale = "Aeolian"
+    if number_of_hand_motions == "Only Melody":
+        number_of_hand_motions = 0
+
+    new_presets = {
+        "meter"      : eval(meter),
+        "key"        : scale.split()[0],
+        "base"       : key.split()[0],
+        "rhythm_pdf" : rhythm_intensity,
+        "form"       : form,
+        "rhythm_repetition_in_mel" : int(rhythm_repetition_in_mel),
+        "repetitions_in_part" : int(repetitions_in_part),
+        "repeat_chord_progression_in_part" : int(repeat_chord_progression_in_part),
+        "max_step_size" : int(max_step_size),
+        "pitch_range": int(pitch_range_mel),
+        "jazzyness": int(jazziness),
+        "num_hands": int(number_of_hand_motions)
+    }
+
+    generate_song(new_presets, tempo)
+
+    res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="song.mid")
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    return res
+
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
