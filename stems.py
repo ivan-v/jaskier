@@ -13,7 +13,7 @@ def shift_octave(part, shift):
 
 
 def choose_leading_tone(origin_pitch, origin_chord, goal):
-    sign = (goal-origin>0) - (goal-origin<0)
+    sign = (goal-origin_pitch>0) - (goal-origin_pitch<0)
 
     r = random.randint(0,2)
     available_pitches = available_pitches_in_full_chord(origin_chord)
