@@ -34,8 +34,8 @@ def convert_presets_to_full_definitions(new_presets):
     return result
 
 
-def generate_song(presets, tempo):
+def generate_song(presets, instrument, tempo):
     new_presets = convert_presets_to_full_definitions(presets)
     p = generate_song_and_chords(new_presets)
-    write_to_midi(p, "song", 0, tempo)
+    write_to_midi(p, "song", instrument, tempo)
 

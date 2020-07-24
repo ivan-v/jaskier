@@ -1,17 +1,3 @@
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import os
 # [START gae_python37_app]
 from flask import Flask, request, send_from_directory
@@ -27,20 +13,20 @@ app.config["CLIENT_DOWNLOADS"] = "/tmp/"
 @app.route('/')
 def hello():
     test()
-    res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="jazz_improv.mid")
+    res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="jazz_improv.midi", as_attachment=True)
     res.headers['Access-Control-Allow-Origin'] = '*'
     return res
 
 @app.route('/song')
 def song():
-    res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="song.mid")
+    res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="song.midi", as_attachment=True)
     res.headers['Access-Control-Allow-Origin'] = '*'
     return res
 
 
 @app.route('/song_gen')
 def song_gen():
-    
+
     key = request.args.get('key')
     meter = request.args.get('meter')
     scale = request.args.get('scale')
@@ -53,6 +39,8 @@ def song_gen():
     pitch_range_mel = request.args.get('pitch_range')
     jazziness = request.args.get('jazziness')
     number_of_hand_motions = request.args.get('num_hands')
+    
+    instrument = int(request.args.get('instrument'))
 
     tempo = int(request.args.get('tempo'))
 
@@ -71,16 +59,16 @@ def song_gen():
         "form"       : form,
         "rhythm_repetition_in_mel" : int(rhythm_repetition_in_mel),
         "repetitions_in_part" : int(repetitions_in_part),
-        "repeat_chord_progression_in_part" : int(repeat_chord_progression_in_part),
+        "repeat_chord_progression_in_part" : int(repeat_chord_progression_in_part)+1,
         "max_step_size" : int(max_step_size),
         "pitch_range": int(pitch_range_mel),
         "jazzyness": int(jazziness),
-        "num_hands": int(number_of_hand_motions)
+        "num_hands": int(number_of_hand_motions),
     }
+    
+    generate_song(new_presets, instrument, tempo)
 
-    generate_song(new_presets, tempo)
-
-    res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="song.mid")
+    res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="song.midi")
     res.headers['Access-Control-Allow-Origin'] = '*'
     return res
 

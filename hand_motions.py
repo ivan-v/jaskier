@@ -211,7 +211,7 @@ def walking_bass(chords, meter):
                 ])
             elif i < len(chords) - 1 and j == measure_size - 1:
                 measure.append([
-                    choose_leading_tone(measure[-1][0], chords[i + 1][0][0]),
+                    choose_leading_tone(measure[-1][0], chords[i][0], chords[i + 1][0][0]),
                     current_rhythm[j], time_length
                 ])
             elif meter[0] % 4 == 0 and j > 1:

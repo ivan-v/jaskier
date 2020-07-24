@@ -158,7 +158,7 @@ def make_coltrane_progression(meter, length, *first_note):
 # TODO: make generate_blues_keys
 
 
-given_fifths = ["Ab7", "Db7", "Ab7", "Ab7", "Db7", "Db7", "Ab7", "Ab7", "Eb7", "Db7", "Ab7", "Eb7"]
+# given_fifths = ["Ab7", "Db7", "Ab7", "Ab7", "Db7", "Db7", "Ab7", "Ab7", "Eb7", "Db7", "Ab7", "Eb7"]
 # notes = populate_blues_tabs_with_jazz_chords((2,4), given_fifths)
 # write_to_midi(notes, "jazz_chords")
 

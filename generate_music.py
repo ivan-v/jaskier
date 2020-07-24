@@ -269,9 +269,10 @@ def write_to_midi(song, filename, instrument, *tempo):
         MyMIDI.addNote(track, channel, song[i][0], song[i][2],
                        Space_Values[song[i][1]], volume)
     
+
     MyMIDI.addProgramChange(0, 0, 0, instrument)
 
-    with open("/tmp/" + filename + ".mid", "wb") as output_file:
+    with open("/tmp/" + filename + ".midi", "wb") as output_file:
         MyMIDI.writeFile(output_file)
 
 

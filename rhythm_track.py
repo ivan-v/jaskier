@@ -5,6 +5,8 @@ from melodic_alteration import strip_part
 from rhythm import generate_rhythm_measure, Space_Values
 from stems import choose_leading_tone
 
+from midiutil import MIDIFile
+
 # from generate_music import write_to_midi
 
 Beat_Intensity_Presets = {
@@ -86,11 +88,44 @@ sequence = ['Am', 'G', 'Fmaj7', 'Em',
   'Dm7', 'G7', 'Cmaj7', 'Bbmaj7', 'Bm11', 'E7', 'Am', 'G', 'Fmaj7', 'Em', 
   'Dm7', 'G7', 'Cmaj7']
 
+
+def write_to_midi(song, filename, instrument, *tempo):
+    track    = 0
+    channel  = 0
+    time     = 0   # In beats
+    if not tempo:
+        tempo    = 160 # In BPM
+    else:
+        tempo = tempo[0]
+    volume   = 100 # 0-127, as per the MIDI standard
+
+    MyMIDI = MIDIFile(1) # One track, defaults to format 1 (tempo track
+                         # automatically created)
+    MyMIDI.addTempo(track, time, tempo)
+
+    for i in range(len(song)):
+        if song[i][0] < 60:
+            volume = 92
+        elif song[i][0] < 50:
+            volume = 86
+        elif song[i][0] < 45:
+            volume = 83
+        else:
+            volume = 100
+        MyMIDI.addNote(track, channel, song[i][0], song[i][2],
+                       Space_Values[song[i][1]], volume)
+    
+    MyMIDI.addProgramChange(0, 0, 0, instrument)
+
+    with open(filename + ".mid", "wb") as output_file:
+        MyMIDI.writeFile(output_file)
+
+
 # meter = (4,4)
 # chords = convert_chord_names_to_over_measures(sequence, meter)
 # rhythm = generate_rhythmic_beat(meter, 5, 2, False)
 
 # g = generate_rhythmic_motion(3, 3, False)
 # rm = generate_full_rhythmic_motion(rhythm, True, g, chords, meter)
-# write_to_midi(rm)
+# write_to_midi(rm, "backing_track", 105)
 
