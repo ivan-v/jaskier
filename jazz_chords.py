@@ -166,7 +166,7 @@ def generate_jazz_chords(key_note, meter, measures_per_chord, is_coltrane, lengt
     chords = convert_chord_names_to_over_measures(chords_names, meter)
     return chords
 
-print(generate_jazz_chords('B', (4,4), 2, True, 20))
+# print(generate_jazz_chords('B', (4,4), 2, True, 20))
 
 # write_to_midi(rm, "backing_track", 105)
 
