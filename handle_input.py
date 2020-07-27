@@ -2,7 +2,7 @@ from forms import Forms
 from generate_music import generate_song_and_chords, write_to_midi
 from jazz_chords import generate_jazz_chords
 from jazz_improvisation import generate_jazz_chords_and_improv
-from rhythm_track import Beat_Intensity_Presets, generate_rhythmic_motion, generate_full_rhythmic_motion
+from rhythm_track import Beat_Intensity_Presets, generate_rhythmic_beat, generate_rhythmic_motion, generate_full_rhythmic_motion
 
 # generate_jazz_chords_and_improv(key_note, meter, measures_per_chord,
                                     # pitch_range, swinging, is_coltrane)
@@ -52,6 +52,6 @@ def convert_presets_to_full_definitions(new_presets):
 
 def generate_song(presets, instrument, tempo):
     new_presets = convert_presets_to_full_definitions(presets)
-    p = generate_song_and_chords(new_presets)
+    p = generate_song_and_chords(presets)
     write_to_midi(p, "song", instrument, tempo)
 

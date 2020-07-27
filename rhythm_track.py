@@ -70,7 +70,7 @@ def generate_full_rhythmic_motion(rhythm, leading_tone, rhythmic_motion,
         for j in range(measure_size):
             if j == measure_size - 1 and i != len(chords) - 1:
                 result.append([
-                    choose_leading_tone(chords[i][0][0], chords[i + 1][0][0]),
+                    choose_leading_tone(chords[i][0][0], chords[i][0], chords[i + 1][0][0]),
                     current_rhythm[j], time_length
                 ])
             elif j + len(rhythmic_motion) > measure_size - leading_tone - 1:
