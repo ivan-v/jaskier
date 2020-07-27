@@ -29,14 +29,14 @@ def song():
 def backing_track_gen():
 
     new_presets = {
-        "style" : request.args.get('style'),
-        "key"   : request.args.get('key').split()[0],
-        "meter" : eval(request.args.get('meter')),
-        "measures_per_chord" : int(request.args.get('measures_per_chord')),
-        "rhythm_pdf" : Beat_Intensity_Presets[request.args.get('rhythm_pdf')],
-        "rhythm_intensity": request.args.get('rhythm_pdf'),
-        "num_repetitions" : int(request.args.get('num_repetitions')),
-        "instrument" : int(request.args.get('instrument')),
+        "style" : request.args.get('bk-style'),
+        "key"   : request.args.get('bk-key').split()[0],
+        "meter" : eval(request.args.get('bk-meter')),
+        "measures_per_chord" : int(request.args.get('bk-measures_per_chord')),
+        "rhythm_pdf" : Beat_Intensity_Presets[request.args.get('bk-rhythm_pdf')],
+        "rhythm_intensity": request.args.get('bk-rhythm_pdf'),
+        "num_repetitions" : int(request.args.get('bk-num_repetitions')),
+        "instrument" : int(request.args.get('bk-instrument')),
     }
 
     tempo = int(request.args.get('tempo'))
