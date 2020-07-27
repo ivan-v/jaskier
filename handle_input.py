@@ -1,7 +1,8 @@
 from forms import Forms
 from generate_music import generate_song_and_chords, write_to_midi
+from jazz_chords import generate_jazz_chords
 from jazz_improvisation import generate_jazz_chords_and_improv
-from rhythm_track import Beat_Intensity_Presets
+from rhythm_track import Beat_Intensity_Presets, generate_rhythmic_motion, generate_full_rhythmic_motion
 
 # generate_jazz_chords_and_improv(key_note, meter, measures_per_chord,
                                     # pitch_range, swinging, is_coltrane)
@@ -14,6 +15,21 @@ from rhythm_track import Beat_Intensity_Presets
 
 def generate_chord_progression(form, key, scale, *repetitions_of_sequence, **args):
     pass
+
+
+def generate_backing_track(presets, tempo):
+    # p = generate_back_track(presets)
+    # p = make_coltrane_progression(presets["meter"], length, presets["key"])
+    length = 20
+
+    if presets["style"] == "Coltrane":
+        chords = generate_jazz_chords(presets["key"], presets["meter"], presets["measures_per_chord"], True, length)
+    elif presets["style"] == "Jazzy":
+        chords = generate_jazz_chords(presets["key"], presets["meter"], presets["measures_per_chord"], False, length)
+    rhythm = generate_rhythmic_beat(presets["meter"], presets["rhythm_intensity"], 2, False)
+    g = generate_rhythmic_motion(3, 3, False)
+    p = generate_full_rhythmic_motion(rhythm, True, g, chords, presets["meter"])
+    write_to_midi(p, "song", presets["instrument"], tempo)
 
 
 def convert_presets_to_full_definitions(new_presets):

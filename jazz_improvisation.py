@@ -3,7 +3,7 @@ import random
 from chord_progression import convert_chord_names_to_over_measures, invert_chords_in_progression
 from generate_music import write_to_midi
 from hand_motions import arpeggios, full_chord, running_scales
-from jazz_chords import apply_jazz_progression, generate_jazz_progression, coltrane_progression
+from jazz_chords import apply_jazz_progression, generate_jazz_progression, coltrane_progression, generate_jazz_chords
 from melodic_alteration import infer_key_from_chords
 from rhythm import generate_rhythm, Space_Values, two_durations_that_equal_another
 from rhythm_track import Beat_Intensity_Presets
@@ -109,18 +109,13 @@ def improvise_over_chord_progression(chords, keys, meter, pitch_range,
     
     return notes + full_chords
 
+
+
 def generate_jazz_chords_and_improv(key_note, meter, measures_per_chord,
-                                    pitch_range, swinging, is_coltrane):
-    if is_coltrane:
-        chords_and_keys = coltrane_progression(20, key_note)
-    else:
-        progression = generate_jazz_progression()
-        chords_and_keys = apply_jazz_progression(progression, key_note)
-    
-    keys = [i[0] for i in chords_and_keys]
-    chord_names = [i[1] for i in chords_and_keys]
-    chords_names = [[name, measures_per_chord] for name in chord_names]
-    chords = convert_chord_names_to_over_measures(chords_names, meter)
+                                    pitch_range, swinging, is_coltrane, length):
+
+    chords = generate_jazz_chords(key_note, meter, measures_per_chord,
+                                  is_coltrane, length)
     
     return improvise_over_chord_progression(chords, keys, meter, pitch_range,
                                             swinging)

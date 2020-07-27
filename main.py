@@ -3,6 +3,8 @@ import os
 from flask import Flask, request, send_from_directory
 from jazz_improvisation import test
 from handle_input import generate_song
+from rhythm_track import Beat_Intensity_Presets
+
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
 app = Flask(__name__)
@@ -23,6 +25,27 @@ def song():
     res.headers['Access-Control-Allow-Origin'] = '*'
     return res
 
+@app.route('/backing_track_gen')
+def backing_track_gen():
+
+    new_presets = {
+        "style" : request.args.get('style'),
+        "key"   : request.args.get('key').split()[0],
+        "meter" : eval(request.args.get('meter')),
+        "measures_per_chord" : int(request.args.get('measures_per_chord')),
+        "rhythm_pdf" : Beat_Intensity_Presets[request.args.get('rhythm_pdf')],
+        "rhythm_intensity": request.args.get('rhythm_pdf'),
+        "num_repetitions" : int(request.args.get('num_repetitions')),
+        "instrument" : int(request.args.get('instrument')),
+    }
+
+    tempo = int(request.args.get('tempo'))
+
+    generate_backing_track(new_presets, tempo)
+
+    res = send_from_directory(app.config["CLIENT_DOWNLOADS"], filename="song.midi")
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    return res
 
 @app.route('/song_gen')
 def song_gen():
@@ -30,7 +53,7 @@ def song_gen():
     key = request.args.get('key')
     meter = request.args.get('meter')
     scale = request.args.get('scale')
-    rhythm_intensity = request.args.get('rhythm_pdf')
+    rhythm_intensity = Beat_Intensity_Presets[request.args.get('rhythm_pdf')]
     form = request.args.get('form')
     rhythm_repetition_in_mel = request.args.get('rhythm_repetition_in_mel') 
     repetitions_in_part = request.args.get('repetitions_in_part')
