@@ -12,7 +12,6 @@ from rhythm_track import Beat_Intensity_Presets, generate_rhythmic_beat, generat
 # p = generate_n_hands(Presets, 2)
 # p = generate_song_from_chords(Presets, chords, True)
 
-
 def generate_chord_progression(form, key, scale, *repetitions_of_sequence, **args):
     pass
 

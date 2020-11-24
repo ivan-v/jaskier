@@ -1,6 +1,6 @@
 import math
 
-from chord_progression import generate_full_chord_sequence, Special_Chords, convert_chord_names_to_over_measures, invert_chords_in_progression
+from chord_progression import generate_full_chord_sequence, convert_chord_names_to_over_measures, invert_chords_in_progression
 from forms import Forms, pick_random_form, match_parts_to_form, match_and_alter_parts_to_form, sync_note_durations
 from hand_motions import generate_hand_motions
 from melodic_alteration import insert_passing_tones, strip_part, infer_key_from_chords
@@ -60,6 +60,7 @@ def generate_melody_pieces(presets, parts, given_chords, progressions, applied_k
             presets["rhythm_repetition_in_mel"], presets["meter"],
             presets["pitch_range"], presets["max_step_size"], fuller)
         melody = sync_note_durations(melody)
+        print(melody)
         for i in range(presets["repetitions_in_part"]):
             if i < presets["repetitions_in_part"]-1:
                 melody += melody
@@ -103,7 +104,7 @@ def generate_song_and_chords(presets):
     
     parts = parts_and_progressions[0]
     progressions = parts_and_progressions[1]
-    
+
     chords = compute_chord_times(parts, presets["form"], presets["meter"])
     chords = invert_chords_in_progression(chords)
 
@@ -272,7 +273,7 @@ def write_to_midi(song, filename, instrument, *tempo):
 
     MyMIDI.addProgramChange(0, 0, 0, instrument)
 
-    with open("/tmp/" + filename + ".midi", "wb") as output_file:
+    with open(filename + ".midi", "wb") as output_file:
         MyMIDI.writeFile(output_file)
 
 
@@ -302,7 +303,7 @@ chords = ['Am', 'G', 'Fmaj7', 'Em',
 
 # All of these work \/
 
-# p = generate_song_and_chords(Presets)
+p = generate_song_and_chords(Test_Presets)
 # p = generate_n_hands(Presets, 2)
 # p = generate_song_from_chords(Presets, chords, True)
 # write_to_midi(p, "song", 0) 

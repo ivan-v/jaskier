@@ -34,7 +34,9 @@ def infer_key_from_chords(chords):
     pitches = sum([[p for p in chord[0]] for chord in chords], [])
     return make_key(infer_key(pitches))
 
-# infer_key()
+
+test_part = [[67, 'qn', 0], [62, 'hn', 1], [69, 'qn', 3], [65, 'qn', 4], [75, 'hn', 5], [74, 'qn', 7], [75, 'hn', 8], [74, 'hn', 10], [75, 'qn', 12], [62, 'hn', 13], [64, 'qn', 15], [65, 'qn', 16], [67, 'hn', 17], [67, 'qn', 19], [62, 'qn', 20], [69, 'hn', 21], [65, 'qn', 23], [67, 'hn', 24], [62, 'hn', 26], [69, 'hn', 28], [65, 'qn', 30], [72, 'qn', 31], [72, 'qn', 32], [72, 'hn', 33], [70, 'qn', 35], [72, 'qn', 36], [62, 'hn', 37], [64, 'qn', 39]]
+infer_key(test_part)
 
 def find_bridge(start, goal, length, fuller_mode):
     if goal not in fuller_mode:

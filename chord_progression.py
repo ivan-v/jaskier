@@ -3,6 +3,9 @@ import random
 from modes_and_keys import apply_key, Starting_Pitch, fuller_mode
 from rhythm import generate_rhythm, merge_pitches_with_rhythm
 
+
+# Builds from the last note to the beginning
+# def grow_chord_progression(progression, function_preferences):
 def grow_chord_progression(progression):
   x = progression
   root = x[0]
@@ -20,23 +23,21 @@ def grow_chord_progression(progression):
     options = [0, 2]
   else:
     options = [0]
+  # return [random.choice(options + [tonic for tonic in function_preference]*2)] + progression
   return [random.choice(options)] + progression
 
 
+# def generate_chord_progression(function_preferences):
 def generate_chord_progression():
   progression = []
   progression.append(0)
-  progression = grow_chord_progression(progression)
+  progression = grow_chord_progression(progression)#, function_preferences)
   while progression[0] != 0:
-    progression = grow_chord_progression(progression)
+    progression = grow_chord_progression(progression)#, function_preferences)
   return progression
 
 
-Special_Chords = {
-  "8-bar blues": [0, 3, 0, 5, 1, 4, 0, 4, 0],
-}
-
-# Jazzyness is 0-4
+# def make_full_chord_progression(applied_key, function_preferences, quality_preferences, scale_quality):
 def make_full_chord_progression(applied_key, jazzyness, *input_tonics):
     result = []
     m = applied_key[1][0]
@@ -44,10 +45,13 @@ def make_full_chord_progression(applied_key, jazzyness, *input_tonics):
     m += [i + 36 for i in m]
     m.sort()
     m = list(set(m))
-    if input_tonics:
-        tonics = input_tonics[0]
-    else:
-        tonics = generate_chord_progression()
+    tonics = generate_chord_progression()
+    # tonics = generate_chord_progression(function_preferences)
+
+    # get_qualiites(quality_preferences)
+    # tonics = []
+
+
     if jazzyness > 0:
         chosen = random.choice([[4], [4, 1], [4, 1, 6], [4, 1, 6, 3]][:jazzyness])
     else:
@@ -83,6 +87,7 @@ def generate_pitches_from_chords(chord_progression, applied_key):
     return pitches
 
 
+# def generate_full_chord_sequence(applied_key, function_preferences, quality_preferencess):
 def generate_full_chord_sequence(applied_key, jazzyness, *input_chords):
   if input_chords:
     chords = make_full_chord_progression(applied_key, jazzyness, input_chords[0])
